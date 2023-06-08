@@ -1,0 +1,1 @@
+export 'productSerializer.dart';
