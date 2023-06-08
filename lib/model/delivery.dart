@@ -1,7 +1,7 @@
 import 'package:intl/intl.dart' as intl;
 
 enum DeliveryStatus {
-  IDLE,
+  PREPARING,
   CANCELED,
   IN_PROGGRESS,
   DELIVERED,
@@ -72,7 +72,7 @@ class Delivery {
       deliveryDate: data['deliveryDate'] ?? '',
       deliveryTo: data['deliveryTo'] ?? '',
       deliveryFrom: data['deliveryFrom'] ?? '',
-      deliveryStatus: data['deliveryStatus'] ?? DeliveryStatus.IDLE.index,
+      deliveryStatus: data['deliveryStatus'] ?? DeliveryStatus.PREPARING.index,
     );
   }
 

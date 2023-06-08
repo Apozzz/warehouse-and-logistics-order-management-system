@@ -50,7 +50,7 @@ class DeliveryHomePageWidget extends State<DeliveryHomePage> {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController courierIdentificationController =
       TextEditingController();
-  int deliveryStatus = DeliveryStatus.IDLE.index;
+  int deliveryStatus = DeliveryStatus.PREPARING.index;
   var deliveryOrderId = -1;
   final formKey = GlobalKey<FormBuilderState>();
   bool codeHasError = false;
@@ -467,7 +467,7 @@ class DeliveryHomePageWidget extends State<DeliveryHomePage> {
     deliveryToController.text = '';
     deliveryFromController.text = '';
     deliveryOrderId = -1;
-    deliveryStatus = DeliveryStatus.IDLE.index;
+    deliveryStatus = DeliveryStatus.PREPARING.index;
     createdAt = '';
     updatedAt = '';
   }
@@ -558,6 +558,21 @@ class DeliveryHomePageWidget extends State<DeliveryHomePage> {
         'Delivery Status',
         'Delivery with code ${delivery.code} has been Received!',
         deliveryDelivered,
+      );
+    }
+
+    if (delivery.deliveryStatus == DeliveryStatus.IN_PROGGRESS.index) {
+      await notifyProvider.init(notificationDeliveryInProgressImage);
+      notifyProvider.requestIOSPermissions();
+      await notifyProvider.scheduleNotifications(
+        'Delivery Status',
+        'Delivery with code ${delivery.code} is being Transported!',
+      );
+
+      await NotificationProvider().saveNotification(
+        'Delivery Status',
+        'Delivery with code ${delivery.code} is being Transported!',
+        deliveryInProgress,
       );
     }
   }

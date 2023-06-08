@@ -208,7 +208,7 @@ class DeliveryProvider {
         deliveryStatuses[2] = DeliveryStatus.IN_PROGGRESS.name;
         break;
       case 1:
-        deliveryStatuses[0] = DeliveryStatus.IDLE.name;
+        deliveryStatuses[0] = DeliveryStatus.PREPARING.name;
         break;
       case 2:
         deliveryStatuses[1] = DeliveryStatus.CANCELED.name;
@@ -338,7 +338,7 @@ class DeliveryProvider {
       }
 
       if (warehousesAddresses.contains(delivery.deliveryFrom)) {
-        if (delivery.deliveryStatus == DeliveryStatus.IDLE.index ||
+        if (delivery.deliveryStatus == DeliveryStatus.PREPARING.index ||
             delivery.deliveryStatus == DeliveryStatus.DELIVERED.index) {
           continue;
         }
