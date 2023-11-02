@@ -40,3 +40,6 @@ export 'handlers/imports.dart';
 export 'package:flutter_screen_lock/flutter_screen_lock.dart';
 export 'constants/imports.dart';
 export 'package:rflutter_alert/rflutter_alert.dart';
+export 'package:firebase_core/firebase_core.dart';
+export 'firebase_options.dart';
+export 'package:provider/provider.dart';
