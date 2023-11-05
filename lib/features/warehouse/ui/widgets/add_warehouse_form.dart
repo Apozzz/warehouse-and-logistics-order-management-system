@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:inventory_system/features/warehouse/services/warehouse_service.dart';
-import 'package:inventory_system/utils/date_utils.dart';
+import 'package:inventory_system/features/warehouse/DAOs/warehouse_dao.dart';
+import 'package:inventory_system/features/warehouse/models/warehouse_model.dart';
+import 'package:inventory_system/features/warehouse/ui/pages/warehouse_page.dart';
+import 'package:inventory_system/shared/extensions/navigator_extension.dart';
+import 'package:inventory_system/shared/hoc/with_company_id.dart';
 import 'package:provider/provider.dart';
 
 class AddWarehouseForm extends StatefulWidget {
@@ -38,7 +41,7 @@ class _AddWarehouseFormState extends State<AddWarehouseForm> {
                         labelText: 'Name',
                         border: OutlineInputBorder(),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: Color.fromARGB(255, 47, 31, 31),
                         prefixIcon: Icon(Icons.business),
                       ),
                       style: const TextStyle(color: Colors.black),
@@ -71,26 +74,26 @@ class _AddWarehouseFormState extends State<AddWarehouseForm> {
                     ElevatedButton.icon(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
-                          final warehouseService =
-                              Provider.of<WarehouseService>(context,
-                                  listen: false);
-                          warehouseService.addWarehouse({
-                            'name': _nameController.text,
-                            'address': _addressController.text,
-                            'createdAt':
-                                CustomDateUtils.formatDate(DateTime.now()),
-                            'companyId': 0,
+                          withCompanyId(context, (companyId) async {
+                            final warehouseDAO = Provider.of<WarehouseDAO>(
+                                context,
+                                listen: false);
+                            final newWarehouse = Warehouse(
+                              id: '', // You may need to adjust this based on how you handle IDs
+                              name: _nameController.text,
+                              address: _addressController.text,
+                              createdAt: DateTime.now(),
+                              companyId: companyId,
+                            );
+                            warehouseDAO.addWarehouse(newWarehouse);
+                            Navigator.of(context).pushReplacementNoTransition(
+                                const WarehousePage());
                           });
-                          Navigator.pop(context);
-                          widget.onWarehouseAdded.call();
                         }
                       },
-                      icon: const Icon(Icons.add, color: Colors.black),
+                      icon: const Icon(Icons.add),
                       label: const Text('Add Warehouse'),
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: Colors.black, // icon and text color
-                      ),
+                      // No need for style here as it uses the theme's default style
                     ),
                   ],
                 ),

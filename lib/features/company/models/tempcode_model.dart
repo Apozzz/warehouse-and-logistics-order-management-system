@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:inventory_system/utils/date_utils.dart';
 
 class TempCode {
@@ -16,12 +17,16 @@ class TempCode {
   });
 
   factory TempCode.fromMap(Map<String, dynamic> data, String id) {
+    final expiration = data['expiration'] is Timestamp
+        ? (data['expiration'] as Timestamp).toDate()
+        : DateTime.now();
+
     return TempCode(
       id: id,
-      code: data['code'],
-      companyId: data['companyId'],
-      roleId: data['roleId'],
-      expiration: CustomDateUtils.parseDate(data['expiration']),
+      code: data['code'] ?? '',
+      companyId: data['companyId'] ?? '',
+      roleId: data['roleId'] ?? '',
+      expiration: expiration,
     );
   }
 
@@ -30,7 +35,7 @@ class TempCode {
       'code': code,
       'companyId': companyId,
       'role': roleId,
-      'createdAt': CustomDateUtils.formatDate(expiration),
+      'createdAt': expiration,
     };
   }
 }

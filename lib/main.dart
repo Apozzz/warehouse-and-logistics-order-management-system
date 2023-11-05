@@ -15,12 +15,13 @@ import 'package:inventory_system/features/authentication/viewmodels/mobile_numbe
 import 'package:inventory_system/features/company/DAOs/company_dao.dart';
 import 'package:inventory_system/features/company/services/company_service.dart';
 import 'package:inventory_system/features/company/ui/pages/company_page.dart';
-import 'package:inventory_system/features/role/services/role_service.dart';
+import 'package:inventory_system/features/product/DAOs/product_dao.dart';
+import 'package:inventory_system/features/role/DAOs/role_dao.dart';
+import 'package:inventory_system/features/user/DAOs/user_dao.dart';
 import 'package:inventory_system/features/user/services/user_service.dart';
-import 'package:inventory_system/features/warehouse/repositories/warehouse_repository.dart';
-import 'package:inventory_system/features/warehouse/services/warehouse_service.dart';
+import 'package:inventory_system/features/warehouse/DAOs/warehouse_dao.dart';
 import 'package:inventory_system/firebase_options.dart';
-import 'package:inventory_system/shared/ui/widgets/app_drawer.dart';
+import 'package:inventory_system/shared/providers/company_provider.dart';
 import 'package:inventory_system/theme.dart';
 import 'package:provider/provider.dart';
 
@@ -61,21 +62,35 @@ void main() async {
       Provider<CompanyDAO>(
         create: (_) => CompanyDAO(),
       ),
-      Provider<RoleService>(
-        create: (_) => RoleService(),
+      Provider<UserDAO>(
+        create: (context) => UserDAO(),
       ),
-      Provider<CompanyService>(
-        create: (context) {
-          final roleService = Provider.of<RoleService>(context, listen: false);
-          final companyDAO = Provider.of<CompanyDAO>(context, listen: false);
-          return CompanyService(roleService, companyDAO);
-        },
+      Provider<RoleDAO>(
+        create: (context) => RoleDAO(),
+      ),
+      Provider<WarehouseDAO>(
+        create: (context) => WarehouseDAO(),
+      ),
+      Provider<ProductDAO>(
+        create: (context) => ProductDAO(),
       ),
       Provider<UserService>(
         create: (context) {
           final companyDAO = Provider.of<CompanyDAO>(context, listen: false);
-          return UserService(companyDAO);
+          final userDAO = Provider.of<UserDAO>(context, listen: false);
+          return UserService(companyDAO, userDAO);
         },
+      ),
+      Provider<CompanyService>(
+        create: (context) {
+          final companyDAO = Provider.of<CompanyDAO>(context, listen: false);
+          final roleDAO = Provider.of<RoleDAO>(context, listen: false);
+          final userDAO = Provider.of<UserDAO>(context, listen: false);
+          return CompanyService(companyDAO, roleDAO, userDAO);
+        },
+      ),
+      ChangeNotifierProvider(
+        create: (context) => CompanyProvider(),
       ),
     ], child: const MyApp()),
   );
@@ -86,54 +101,40 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final email =
-        Provider.of<EmailPasswordAuthViewModel>(context, listen: false);
-    email.signIn();
-    return ChangeNotifierProvider(
-      create: (context) =>
-          WarehouseService(WarehouseRepository(FirebaseFirestore.instance)),
-      child: MaterialApp(
-        title: 'Inventory System',
-        theme: buildTheme(),
-        home: StreamBuilder(
-          stream: FirebaseAuth.instance.authStateChanges(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.active) {
-              User? user = snapshot.data;
+    // final email =
+    //     Provider.of<EmailPasswordAuthViewModel>(context, listen: false);
+    // email.signIn();
+    return MaterialApp(
+      title: 'Inventory System',
+      theme: buildTheme(),
+      home: StreamBuilder(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.active) {
+            User? user = snapshot.data;
 
-              if (user != null) {
-                // User is signed in. Create/update user document in Firestore.
-                final userService =
-                    Provider.of<UserService>(context, listen: false);
-                userService.createUser(user);
-              }
+            if (user != null) {
+              // User is signed in. Create/update user document in Firestore.
+              final userService =
+                  Provider.of<UserService>(context, listen: false);
+              userService.createUser(user);
+            }
 
-              if (user == null) {
-                return Scaffold(
-                  appBar: AppBar(title: const Text('Inventory System')),
-                  body: const AuthSelectionPage(),
-                );
-              } else {
-                return Scaffold(
-                  appBar: AppBar(
-                    title: const Text('Inventory System'),
-                    leading: Builder(
-                      builder: (context) => IconButton(
-                        icon: const Icon(Icons.menu),
-                        onPressed: () => Scaffold.of(context).openDrawer(),
-                      ),
-                    ),
-                  ),
-                  drawer: const AppDrawer(),
-                  body: const CompanySelectionPage(),
-                );
-              }
+            if (user == null) {
+              return Scaffold(
+                appBar: AppBar(title: const Text('Inventory System')),
+                body: const AuthSelectionPage(),
+              );
             } else {
               return const Scaffold(
-                  body: Center(child: CircularProgressIndicator()));
+                body: CompanySelectionPage(),
+              );
             }
-          },
-        ),
+          } else {
+            return const Scaffold(
+                body: Center(child: CircularProgressIndicator()));
+          }
+        },
       ),
     );
   }

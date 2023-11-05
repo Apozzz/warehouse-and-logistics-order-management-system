@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:inventory_system/features/warehouse/models/warehouse.dart';
-import 'package:inventory_system/features/warehouse/services/warehouse_service.dart';
+import 'package:inventory_system/features/warehouse/DAOs/warehouse_dao.dart';
+import 'package:inventory_system/features/warehouse/models/warehouse_model.dart';
+import 'package:inventory_system/features/warehouse/ui/pages/warehouse_page.dart';
 import 'package:inventory_system/features/warehouse/ui/widgets/edit_warehouse_screen.dart';
+import 'package:inventory_system/shared/extensions/navigator_extension.dart';
+import 'package:inventory_system/shared/hoc/with_company_id.dart';
 import 'package:provider/provider.dart';
 
 class WarehouseTile extends StatelessWidget {
@@ -11,8 +14,7 @@ class WarehouseTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final warehouseService =
-        Provider.of<WarehouseService>(context, listen: false);
+    final warehouseDAO = Provider.of<WarehouseDAO>(context, listen: false);
 
     return Card(
       margin: const EdgeInsets.all(8.0),
@@ -50,9 +52,9 @@ class WarehouseTile extends StatelessWidget {
                   TextButton(
                     child: const Text('Delete'),
                     onPressed: () {
-                      // Call delete method on service
-                      warehouseService.deleteWarehouse(warehouse.id);
-                      Navigator.of(context).pop();
+                      warehouseDAO.deleteWarehouse(warehouse.id);
+                      Navigator.of(context)
+                          .pushReplacementNoTransition(const WarehousePage());
                     },
                   ),
                 ],

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:inventory_system/features/warehouse/models/warehouse.dart';
-import 'package:inventory_system/features/warehouse/services/warehouse_service.dart';
+import 'package:inventory_system/features/warehouse/DAOs/warehouse_dao.dart';
+import 'package:inventory_system/features/warehouse/models/warehouse_model.dart';
+import 'package:inventory_system/features/warehouse/ui/pages/warehouse_page.dart';
+import 'package:inventory_system/shared/extensions/navigator_extension.dart';
+import 'package:inventory_system/shared/hoc/with_company_id.dart';
 import 'package:provider/provider.dart';
 
 class EditWarehouseScreen extends StatefulWidget {
@@ -26,9 +29,6 @@ class _EditWarehouseScreenState extends State<EditWarehouseScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final warehouseService =
-        Provider.of<WarehouseService>(context, listen: false);
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Edit ${widget.warehouse.name}'),
@@ -78,22 +78,26 @@ class _EditWarehouseScreenState extends State<EditWarehouseScreen> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    final updatedWarehouse = Warehouse(
-                      id: widget.warehouse.id,
-                      name: _nameController.text,
-                      address: _addressController.text,
-                      createdAt: widget.warehouse.createdAt,
-                      companyId: widget.warehouse.companyId,
-                    );
-                    warehouseService.updateWarehouse(
-                        updatedWarehouse.id, updatedWarehouse.toMap());
-                    Navigator.of(context).pop();
+                    // Assuming you have a method in your context to get the companyId
+                    withCompanyId(context, (companyId) async {
+                      final updatedWarehouse = Warehouse(
+                        id: widget.warehouse.id,
+                        name: _nameController.text,
+                        address: _addressController.text,
+                        createdAt: widget.warehouse.createdAt,
+                        companyId:
+                            companyId, // Here you get the companyId from context
+                      );
+                      final warehouseDAO =
+                          Provider.of<WarehouseDAO>(context, listen: false);
+                      // Now, call the update method on your service with the companyId
+                      await warehouseDAO.updateWarehouse(
+                          updatedWarehouse.id, updatedWarehouse.toMap());
+                    });
+                    Navigator.of(context)
+                        .pushReplacementNoTransition(const WarehousePage());
                   }
                 },
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: Colors.black, // text color
-                ),
                 child: const Text('Save Changes'),
               ),
             ],

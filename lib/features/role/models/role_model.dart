@@ -20,11 +20,12 @@ class Role {
   factory Role.fromMap(Map<String, dynamic> data, String id) {
     return Role(
       id: id,
-      name: data['name'],
-      permissions: (data['permissions'] as List<dynamic>)
-          .map((e) => Permission.values[e])
-          .toSet(),
-      companyId: data['companyId'],
+      name: data['name'] ?? '',
+      permissions: (data['permissions'] as List<dynamic>?)
+              ?.map((e) => Permission.values[e])
+              .toSet() ??
+          {},
+      companyId: data['companyId'] ?? '',
     );
   }
 
@@ -35,6 +36,15 @@ class Role {
       'permissions': permissions.map((e) => e.index).toList(),
       'companyId': companyId,
     };
+  }
+
+  static Role empty() {
+    return Role(
+      id: '',
+      name: '',
+      permissions: <Permission>{},
+      companyId: '',
+    );
   }
 }
 

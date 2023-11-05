@@ -70,11 +70,10 @@ class _CompanyCreateFormState extends State<CompanyCreateForm> {
           final company = await companyService.createCompany(
             _nameController.text,
             _addressController.text,
-            currentUser, // Assume you'll map Firebase User to your User model
-            // ... assume ceoRole is obtained elsewhere in your app or is a fixed value ...
+            currentUser,
           );
-          // Navigate to the company details page or somewhere else
-          Navigator.pop(context, company);
+          Navigator.pop(context,
+              company); // Pass the created company back to the previous page
         } catch (e) {
           // Handle the error e.g., show a snackbar with the error message
           ScaffoldMessenger.of(context).showSnackBar(

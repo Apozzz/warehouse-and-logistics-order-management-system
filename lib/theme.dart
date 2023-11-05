@@ -15,5 +15,16 @@ ThemeData buildTheme() {
       secondary: Colors.black,
       onSecondary: Colors.white,
     ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: Colors.black, // This is what you want to add!
+      ),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        foregroundColor: Colors.white,
+        backgroundColor: Colors.black, // Text color for ElevatedButton
+      ),
+    ),
   );
 }

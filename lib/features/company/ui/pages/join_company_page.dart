@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:inventory_system/features/company/services/company_service.dart';
+import 'package:inventory_system/shared/ui/widgets/base_scaffold.dart';
 import 'package:provider/provider.dart';
 
 class CompanyJoinPage extends StatelessWidget {
@@ -9,7 +10,7 @@ class CompanyJoinPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BaseScaffold(
       appBar: AppBar(
         title: const Text('Join Existing Company'),
       ),

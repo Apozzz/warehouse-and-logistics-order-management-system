@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:inventory_system/utils/date_utils.dart';
 
 class Warehouse {
@@ -5,7 +6,7 @@ class Warehouse {
   final String name;
   final String address;
   final DateTime createdAt;
-  final int companyId;
+  final String companyId;
 
   Warehouse({
     required this.id,
@@ -17,12 +18,16 @@ class Warehouse {
 
   // Factory constructor to create a Warehouse instance from a Map
   factory Warehouse.fromMap(Map<String, dynamic> data, String id) {
+    final createdAt = data['createdAt'] is Timestamp
+        ? (data['createdAt'] as Timestamp).toDate()
+        : DateTime.now();
+
     return Warehouse(
       id: id,
-      name: data['name'],
-      address: data['address'],
-      createdAt: CustomDateUtils.parseDate(data['createdAt']),
-      companyId: data['companyId'],
+      name: data['name'] ?? '',
+      address: data['address'] ?? '',
+      createdAt: createdAt,
+      companyId: data['companyId'] ?? '',
     );
   }
 
@@ -34,5 +39,15 @@ class Warehouse {
       'createdAt': CustomDateUtils.formatDate(createdAt),
       'companyId': companyId,
     };
+  }
+
+  static Warehouse empty() {
+    return Warehouse(
+      id: '',
+      name: '',
+      createdAt: DateTime.now(),
+      companyId: '',
+      address: '',
+    );
   }
 }
