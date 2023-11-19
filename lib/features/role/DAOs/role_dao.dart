@@ -4,16 +4,7 @@ import 'package:inventory_system/features/role/models/role_model.dart';
 class RoleDAO {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Future<List<Role>> getRolesByIds(List<String> roleIds) async {
-    final roleDocs = await _db
-        .collection('roles')
-        .where(FieldPath.documentId, whereIn: roleIds)
-        .get();
-    return roleDocs.docs
-        .map((doc) => Role.fromMap(doc.data(), doc.id))
-        .toList();
-  }
-
+  // Creates a new role
   Future<Role> createRole(
       String name, Set<Permission> permissions, String companyId) async {
     final role = Role(
@@ -24,24 +15,33 @@ class RoleDAO {
     );
 
     final docRef = await _db.collection('roles').add(role.toMap());
-    return Role(
-      id: docRef.id,
-      name: role.name,
-      permissions: role.permissions,
-      companyId: role.companyId,
-    ); // Update the role with the generated ID
+    return role.copyWith(
+        id: docRef.id); // Update the role with the generated ID
   }
 
+  // Fetches roles by their IDs
+  Future<List<Role>> getRolesByIds(List<String> roleIds) async {
+    final roleDocs = await _db
+        .collection('roles')
+        .where(FieldPath.documentId, whereIn: roleIds)
+        .get();
+    return roleDocs.docs
+        .map((doc) => Role.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+        .toList();
+  }
+
+  // Fetches roles by companyId
   Future<List<Role>> getRolesByCompanyId(String companyId) async {
     final roleDocs = await _db
         .collection('roles')
         .where('companyId', isEqualTo: companyId)
         .get();
     return roleDocs.docs
-        .map((doc) => Role.fromMap(doc.data(), doc.id))
+        .map((doc) => Role.fromMap(doc.data() as Map<String, dynamic>, doc.id))
         .toList();
   }
 
+  // Updates a role
   Future<void> updateRole(Role updatedRole) async {
     await _db
         .collection('roles')
@@ -49,6 +49,7 @@ class RoleDAO {
         .update(updatedRole.toMap());
   }
 
+  // Deletes a role by ID
   Future<void> deleteRole(String roleId) async {
     await _db.collection('roles').doc(roleId).delete();
   }

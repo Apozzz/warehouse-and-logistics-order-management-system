@@ -35,7 +35,7 @@ class TempCode {
       'code': code,
       'companyId': companyId,
       'role': roleId,
-      'createdAt': expiration,
+      'expiration': expiration,
     };
   }
 }

@@ -15,10 +15,13 @@ import 'package:inventory_system/features/authentication/viewmodels/mobile_numbe
 import 'package:inventory_system/features/company/DAOs/company_dao.dart';
 import 'package:inventory_system/features/company/services/company_service.dart';
 import 'package:inventory_system/features/company/ui/pages/company_page.dart';
+import 'package:inventory_system/features/delivery/DAOs/delivery_dao.dart';
+import 'package:inventory_system/features/order/DAOs/order_dao.dart';
 import 'package:inventory_system/features/product/DAOs/product_dao.dart';
 import 'package:inventory_system/features/role/DAOs/role_dao.dart';
 import 'package:inventory_system/features/user/DAOs/user_dao.dart';
 import 'package:inventory_system/features/user/services/user_service.dart';
+import 'package:inventory_system/features/vehicle/DAOs/vehicle_dao.dart';
 import 'package:inventory_system/features/warehouse/DAOs/warehouse_dao.dart';
 import 'package:inventory_system/firebase_options.dart';
 import 'package:inventory_system/shared/providers/company_provider.dart';
@@ -60,7 +63,7 @@ void main() async {
         ),
       ),
       Provider<CompanyDAO>(
-        create: (_) => CompanyDAO(),
+        create: (context) => CompanyDAO(),
       ),
       Provider<UserDAO>(
         create: (context) => UserDAO(),
@@ -73,6 +76,15 @@ void main() async {
       ),
       Provider<ProductDAO>(
         create: (context) => ProductDAO(),
+      ),
+      Provider<OrderDAO>(
+        create: (context) => OrderDAO(),
+      ),
+      Provider<VehicleDAO>(
+        create: (context) => VehicleDAO(),
+      ),
+      Provider<DeliveryDAO>(
+        create: (context) => DeliveryDAO(),
       ),
       Provider<UserService>(
         create: (context) {

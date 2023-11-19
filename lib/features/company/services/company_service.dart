@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:inventory_system/features/company/DAOs/company_dao.dart';
 import 'package:inventory_system/features/company/models/company_model.dart';
 import 'package:inventory_system/features/company/models/tempcode_model.dart';
+import 'package:inventory_system/features/company/ui/pages/company_details_page.dart';
 import 'package:inventory_system/features/role/DAOs/role_dao.dart';
 import 'package:inventory_system/features/role/models/role_model.dart';
 import 'package:inventory_system/features/user/DAOs/user_dao.dart';
@@ -95,28 +96,50 @@ class CompanyService {
   }
 
   Future<void> joinCompany(TempCode tempCode) async {
-    final company = await getCompany(tempCode.companyId);
     final user = _auth.currentUser;
-    if (user != null) {
-      final updatedUserRoles = Map<String, String>.from(company.userRoles);
-      updatedUserRoles[user.uid] = tempCode.roleId;
-
-      final updatedCompany = Company(
-        id: company.id,
-        name: company.name,
-        address: company.address,
-        createdAt: company.createdAt,
-        ceo: company.ceo,
-        userRoles: updatedUserRoles,
-      );
-
-      await _db
-          .collection('companies')
-          .doc(company.id)
-          .set(updatedCompany.toMap());
-    } else {
+    if (user == null) {
       throw Exception('User not signed in');
     }
+
+    return _db.runTransaction((transaction) async {
+      final companyDocRef = _db.collection('companies').doc(tempCode.companyId);
+      final userDocRef = _db.collection('users').doc(user.uid);
+
+      // Read the documents
+      final companySnapshot = await transaction.get(companyDocRef);
+      final userSnapshot = await transaction.get(userDocRef);
+
+      if (!companySnapshot.exists) {
+        throw Exception('Company does not exist');
+      }
+      if (!userSnapshot.exists) {
+        throw Exception('User does not exist');
+      }
+
+      // Process company data
+      final companyData = companySnapshot.data();
+      if (companyData == null) {
+        throw Exception('Company data is null');
+      }
+      final userRolesMap = companyData['userRoles'] as Map;
+      final updatedUserRoles = userRolesMap
+          .map((key, value) => MapEntry<String, String>(key, value.toString()));
+      updatedUserRoles[user.uid] = tempCode.roleId;
+
+      // Process user data
+      final userData = userSnapshot.data();
+      if (userData == null) {
+        throw Exception('User data is null');
+      }
+      var userCompanyIds = List<String>.from(userData['companyIds'] ?? []);
+      if (!userCompanyIds.contains(tempCode.companyId)) {
+        userCompanyIds.add(tempCode.companyId);
+      }
+
+      // Write the updated data
+      transaction.update(companyDocRef, {'userRoles': updatedUserRoles});
+      transaction.update(userDocRef, {'companyIds': userCompanyIds});
+    });
   }
 
   Future<Map<String, Map<String, String>>> getUserRoleNames(

@@ -30,6 +30,11 @@ class Product {
         ? (data['createdAt'] as Timestamp).toDate()
         : DateTime.now();
 
+    List<String>? categories;
+    if (data['categories'] != null) {
+      categories = List<String>.from(data['categories']);
+    }
+
     return Product(
       id: documentId,
       name: data['name'] ?? '',
@@ -40,8 +45,7 @@ class Product {
       quantity: data['quantity'] ?? 0,
       createdAt: createdAt,
       companyId: data['companyId'] ?? '',
-      categories:
-          (data['categories'] as List).map((item) => item as String).toList(),
+      categories: categories,
     );
   }
 

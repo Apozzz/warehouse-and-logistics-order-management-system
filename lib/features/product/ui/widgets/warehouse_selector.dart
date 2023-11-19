@@ -4,21 +4,21 @@ import 'package:inventory_system/features/warehouse/models/warehouse_model.dart'
 import 'package:inventory_system/shared/hoc/with_company_id.dart';
 import 'package:provider/provider.dart';
 
-class WarehouseSelector extends StatefulWidget {
+class WarehouseSelect extends StatefulWidget {
   final Warehouse? initialWarehouse;
   final Function(Warehouse?) onSelected;
 
-  const WarehouseSelector({
+  const WarehouseSelect({
+    Key? key,
     this.initialWarehouse,
     required this.onSelected,
-    Key? key,
   }) : super(key: key);
 
   @override
-  _WarehouseSelectorState createState() => _WarehouseSelectorState();
+  _WarehouseSelectState createState() => _WarehouseSelectState();
 }
 
-class _WarehouseSelectorState extends State<WarehouseSelector> {
+class _WarehouseSelectState extends State<WarehouseSelect> {
   Warehouse? selectedWarehouse;
 
   @override
@@ -29,45 +29,44 @@ class _WarehouseSelectorState extends State<WarehouseSelector> {
 
   @override
   Widget build(BuildContext context) {
-    final warehouseDAO = Provider.of<WarehouseDAO>(context, listen: false);
-
     return FutureBuilder<List<Warehouse>?>(
       future: withCompanyId(
-          context, (companyId) => warehouseDAO.fetchWarehouses(companyId)),
+        context,
+        (companyId) => Provider.of<WarehouseDAO>(context, listen: false)
+            .fetchWarehouses(companyId),
+      ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
-        } else if (!snapshot.hasData ||
-            snapshot.data == null ||
-            snapshot.data!.isEmpty) {
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const Text('No warehouses available.');
         } else {
+          List<Warehouse> warehouses = snapshot.data!;
+
+          if (selectedWarehouse != null &&
+              !warehouses.contains(selectedWarehouse)) {
+            selectedWarehouse = null;
+          }
+
           return DropdownButtonFormField<Warehouse>(
             value: selectedWarehouse,
-            items: snapshot.data!.map((Warehouse warehouse) {
+            items: warehouses.map((Warehouse warehouse) {
               return DropdownMenuItem<Warehouse>(
                 value: warehouse,
                 child: Text(warehouse.name),
               );
             }).toList(),
             onChanged: (Warehouse? newValue) {
-              setState(() {
-                selectedWarehouse = newValue;
-                widget.onSelected(newValue);
-              });
+              widget.onSelected(newValue);
             },
             decoration: const InputDecoration(
-              labelText: 'Warehouse',
+              labelText: 'Select Warehouse',
               border: OutlineInputBorder(),
             ),
-            validator: (value) {
-              if (value == null) {
-                return 'Please select a warehouse';
-              }
-              return null;
-            },
+            validator: (value) =>
+                value == null ? 'Please select a warehouse' : null,
           );
         }
       },

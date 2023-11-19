@@ -50,4 +50,18 @@ class Warehouse {
       address: '',
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is Warehouse &&
+        other.id == id &&
+        other.name == name &&
+        other.address == address &&
+        other.companyId == companyId;
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, address, companyId);
 }

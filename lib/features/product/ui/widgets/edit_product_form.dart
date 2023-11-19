@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:inventory_system/features/product/DAOs/product_dao.dart';
 import 'package:inventory_system/features/product/models/product_model.dart';
+import 'package:inventory_system/features/product/ui/pages/product_page.dart';
 import 'package:inventory_system/features/product/ui/widgets/product_form.dart';
 import 'package:inventory_system/features/warehouse/DAOs/warehouse_dao.dart';
 import 'package:inventory_system/features/warehouse/models/warehouse_model.dart';
+import 'package:inventory_system/shared/extensions/navigator_extension.dart';
 import 'package:inventory_system/shared/hoc/with_company_id.dart';
 import 'package:provider/provider.dart';
 
@@ -46,14 +48,17 @@ class _EditProductScreenState extends State<EditProductScreen> {
       return const CircularProgressIndicator();
     }
 
-    return ProductForm(
-      warehouses: warehouses!,
-      product: widget.product,
-      onSubmit: (updatedProduct) async {
-        await productDAO.updateProduct(
-            widget.product.id, updatedProduct.toMap());
-        navigator.pushReplacementNamed('/products');
-      },
+    return Material(
+      child: ProductForm(
+        warehouses: warehouses!,
+        product: widget.product,
+        companyId: widget.product.companyId,
+        onSubmit: (updatedProduct) async {
+          await productDAO.updateProduct(
+              widget.product.id, updatedProduct.toMap());
+          navigator.pushReplacementNoTransition(const ProductPage());
+        },
+      ),
     );
   }
 }

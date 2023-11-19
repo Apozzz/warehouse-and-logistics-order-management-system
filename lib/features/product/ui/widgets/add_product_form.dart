@@ -17,6 +17,8 @@ class AddProductForm extends StatefulWidget {
 
 class _AddProductFormState extends State<AddProductForm> {
   List<Warehouse>? warehouses;
+  String? companyId;
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -27,12 +29,21 @@ class _AddProductFormState extends State<AddProductForm> {
   Future<void> _fetchData() async {
     final warehouseDAO = Provider.of<WarehouseDAO>(context, listen: false);
 
-    await withCompanyId<void>(context, (companyId) async {
-      warehouses = await warehouseDAO.fetchWarehouses(companyId);
-      setState(() {
-        warehouses;
+    try {
+      // Assuming withCompanyId will throw if companyId is null or not found.
+      companyId = await withCompanyId<String>(context, (id) async {
+        // Now that we have the companyId, let's fetch the warehouses
+        warehouses = await warehouseDAO.fetchWarehouses(id);
+        return id; // Return the companyId to be used in the state
       });
-    });
+    } finally {
+      // Ensures the UI is rebuilt with new data or error message
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -40,12 +51,17 @@ class _AddProductFormState extends State<AddProductForm> {
     final productDAO = Provider.of<ProductDAO>(context, listen: false);
     final navigator = Navigator.of(context);
 
-    if (warehouses == null) {
+    if (isLoading) {
       return const CircularProgressIndicator();
+    }
+
+    if (warehouses == null || companyId == null) {
+      return const Text('No warehouses available or company ID is missing.');
     }
 
     return ProductForm(
       warehouses: warehouses!,
+      companyId: companyId!,
       onSubmit: (product) async {
         await productDAO.addProduct(product);
         navigator.pushReplacementNoTransition(const ProductPage());

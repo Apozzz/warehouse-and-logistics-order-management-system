@@ -9,7 +9,7 @@ class BarcodeScanner {
         '#ff6666', // line color
         'Cancel', // cancel button text
         true, // is flashlight available
-        ScanMode.BARCODE, // scanning for barcode (not QR)
+        ScanMode.DEFAULT, // scanning for barcode (not QR)
       );
       if (barcode == '-1') {
         // User cancelled the scanning process
