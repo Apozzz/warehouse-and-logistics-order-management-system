@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/enums/app_page.dart';
+import 'package:inventory_system/enums/permission_type.dart';
 import 'package:inventory_system/features/vehicle/DAOs/vehicle_dao.dart';
 import 'package:inventory_system/features/vehicle/models/vehicle_model.dart';
 import 'package:inventory_system/features/vehicle/ui/widgets/edit_vehicle.dart';
 import 'package:inventory_system/shared/hoc/with_company_id.dart';
+import 'package:inventory_system/shared/ui/widgets/permission_controlled_action_button.dart';
 import 'package:provider/provider.dart';
 
 class VehicleList extends StatefulWidget {
@@ -54,61 +57,67 @@ class _VehicleListState extends State<VehicleList> {
               title: Text('Vehicle: ${vehicle.type}'),
               subtitle: Text(
                   'Reg#: ${vehicle.registrationNumber} - Max Weight: ${vehicle.maxWeight} kg'),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              EditVehicleScreen(vehicle: vehicle),
-                        ),
-                      ).then((_) {
-                        fetchVehiclesWithCompanyId(); // Refresh the list when returning from the edit screen
-                      });
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: const Text('Delete Vehicle'),
-                            content: Text(
-                                'Are you sure you want to delete ${vehicle.type} with Reg#: ${vehicle.registrationNumber}?'),
-                            actions: [
-                              TextButton(
-                                child: const Text('Cancel'),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                              TextButton(
-                                child: const Text('Delete'),
-                                onPressed: () async {
-                                  await withCompanyId<void>(context,
-                                      (companyId) async {
-                                    final vehicleDAO = Provider.of<VehicleDAO>(
-                                        context,
-                                        listen: false);
-                                    await vehicleDAO.deleteVehicle(vehicle.id);
-                                    navigator.pop();
-                                    fetchVehiclesWithCompanyId(); // Refresh the list after deletion
-                                  });
-                                },
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ],
+              trailing: PermissionControlledActionButton(
+                appPage:
+                    AppPage.Vehicles, // Specify the AppPage for the delivery
+                permissionType: PermissionType.Manage,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                EditVehicleScreen(vehicle: vehicle),
+                          ),
+                        ).then((_) {
+                          fetchVehiclesWithCompanyId(); // Refresh the list when returning from the edit screen
+                        });
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text('Delete Vehicle'),
+                              content: Text(
+                                  'Are you sure you want to delete ${vehicle.type} with Reg#: ${vehicle.registrationNumber}?'),
+                              actions: [
+                                TextButton(
+                                  child: const Text('Cancel'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                                TextButton(
+                                  child: const Text('Delete'),
+                                  onPressed: () async {
+                                    await withCompanyId<void>(context,
+                                        (companyId) async {
+                                      final vehicleDAO =
+                                          Provider.of<VehicleDAO>(context,
+                                              listen: false);
+                                      await vehicleDAO
+                                          .deleteVehicle(vehicle.id);
+                                      navigator.pop();
+                                      fetchVehiclesWithCompanyId(); // Refresh the list after deletion
+                                    });
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
             );
           },

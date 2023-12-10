@@ -44,4 +44,13 @@ class DeliveryDAO {
   Future<void> deleteDelivery(String deliveryId) async {
     await _db.collection('deliveries').doc(deliveryId).delete();
   }
+
+  Future<int> getTotalDeliveries(String companyId) async {
+    final QuerySnapshot snapshot = await _db
+        .collection('deliveries')
+        .where('companyId', isEqualTo: companyId)
+        .get();
+
+    return snapshot.docs.length; // Returns the count of documents
+  }
 }

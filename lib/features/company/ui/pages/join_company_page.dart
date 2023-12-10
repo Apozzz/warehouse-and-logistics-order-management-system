@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/constants/route_paths.dart';
 import 'package:inventory_system/features/company/services/company_service.dart';
-import 'package:inventory_system/features/company/ui/pages/company_details_page.dart';
 import 'package:inventory_system/features/company/ui/pages/company_page.dart';
 import 'package:inventory_system/shared/extensions/navigator_extension.dart';
 import 'package:inventory_system/shared/ui/widgets/base_scaffold.dart';
@@ -43,7 +43,7 @@ class CompanyJoinPage extends StatelessWidget {
     final code = _codeController.text;
     try {
       await companyService.joinCompanyWithCode(code);
-      navigator.pushReplacementNoTransition(const CompanySelectionPage());
+      navigator.pushReplacementNamedNoTransition(RoutePaths.selectCompany);
       // Optionally, navigate to a different page or show a success message
     } catch (e) {
       // Handle error, e.g., show a snackbar with an error message

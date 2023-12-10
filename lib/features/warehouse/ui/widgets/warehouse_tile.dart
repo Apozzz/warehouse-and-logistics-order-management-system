@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/constants/route_paths.dart';
 import 'package:inventory_system/features/warehouse/DAOs/warehouse_dao.dart';
 import 'package:inventory_system/features/warehouse/models/warehouse_model.dart';
 import 'package:inventory_system/features/warehouse/ui/pages/warehouse_page.dart';
@@ -53,8 +54,8 @@ class WarehouseTile extends StatelessWidget {
                     child: const Text('Delete'),
                     onPressed: () {
                       warehouseDAO.deleteWarehouse(warehouse.id);
-                      Navigator.of(context)
-                          .pushReplacementNoTransition(const WarehousePage());
+                      Navigator.of(context).pushReplacementNamedNoTransition(
+                          RoutePaths.warehouses);
                     },
                   ),
                 ],

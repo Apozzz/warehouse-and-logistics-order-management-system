@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/constants/route_paths.dart';
 import 'package:inventory_system/features/vehicle/DAOs/vehicle_dao.dart';
 import 'package:inventory_system/features/vehicle/models/vehicle_model.dart';
 import 'package:inventory_system/features/vehicle/ui/pages/vehicle_page.dart';
@@ -56,8 +57,8 @@ class _EditVehicleScreenState extends State<EditVehicleScreen> {
         onSubmit: (updatedVehicle) async {
           await vehicleDAO.updateVehicle(
               widget.vehicle.id, updatedVehicle.toMap());
-          navigator.pushReplacementNoTransition(
-              const VehiclePage()); // Go back after updating vehicle
+          navigator.pushReplacementNamedNoTransition(
+              RoutePaths.vehicles); // Go back after updating vehicle
         },
       ),
     );

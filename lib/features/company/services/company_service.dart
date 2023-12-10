@@ -1,18 +1,16 @@
 import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
+import 'package:inventory_system/enums/app_page.dart';
+import 'package:inventory_system/enums/permission_type.dart';
 import 'package:inventory_system/features/company/DAOs/company_dao.dart';
 import 'package:inventory_system/features/company/models/company_model.dart';
 import 'package:inventory_system/features/company/models/tempcode_model.dart';
-import 'package:inventory_system/features/company/ui/pages/company_details_page.dart';
+import 'package:inventory_system/features/permissions/models/role_permission_model.dart';
 import 'package:inventory_system/features/role/DAOs/role_dao.dart';
 import 'package:inventory_system/features/role/models/role_model.dart';
 import 'package:inventory_system/features/user/DAOs/user_dao.dart';
 import 'package:inventory_system/features/user/models/user_model.dart' as user;
-import 'package:inventory_system/features/user/services/user_service.dart';
-import 'package:provider/provider.dart';
 
 class CompanyService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -27,6 +25,7 @@ class CompanyService {
   // Method to create a new company
   Future<Company> createCompany(
       String name, String address, User ceoUser) async {
+    // Create the company object
     var company = Company(
       id: '',
       name: name,
@@ -36,22 +35,30 @@ class CompanyService {
       userRoles: {},
     );
 
-    company = await _companyDAO.saveCompany(
-        company); // Update company with the returned Company instance
+    // Save the company to the database
+    company = await _companyDAO.saveCompany(company);
 
+    // Create a list of RolePermission with all permissions for the CEO
+    List<RolePermission> ceoPermissions = AppPage.values.map((page) {
+      return RolePermission(
+          page: page,
+          permissions: {for (var type in PermissionType.values) type: true});
+    }).toList();
+
+    // Create the CEO role with all permissions
     final ceoRole = await _roleDAO.createRole(
       'CEO',
-      {Permission.ManageUsers, Permission.ViewFinancialData},
+      ceoPermissions, // This should be a List<RolePermission>
       company.id,
     );
 
-    company = company.copyWith(userRoles: {
-      ceoUser.uid: ceoRole.id
-    }); // Update company with new userRoles
-    await _companyDAO.saveCompany(company); // Update company in Firestore
+    // Update the company with the new userRoles
+    company = company.copyWith(userRoles: {ceoUser.uid: ceoRole.id});
 
-    await _userDAO.addCompanyToUser(
-        ceoUser.uid, company.id); // Assign company to user
+    await _companyDAO.saveCompany(company);
+
+    // Assign company to the CEO user
+    await _userDAO.addCompanyToUser(ceoUser.uid, company.id);
 
     return company;
   }
@@ -144,24 +151,38 @@ class CompanyService {
 
   Future<Map<String, Map<String, String>>> getUserRoleNames(
       Company company) async {
-    final userIds = company.userRoles.keys.toList();
-    final roleIds = company.userRoles.values.toList();
+    // Filter out user-role pairs where either the userId or roleId are empty
+    final validEntries = company.userRoles.entries
+        .where((entry) => entry.key.isNotEmpty && entry.value.isNotEmpty)
+        .toList();
 
+    // Extract the userIds and roleIds from the valid entries
+    final userIds = validEntries.map((e) => e.key).toList();
+    final roleIds = validEntries.map((e) => e.value).toList();
+
+    // Get the user and role models from the database
     final users = await _userDAO.getUsersByIds(userIds);
     final roles = await _roleDAO.getRolesByIds(roleIds);
 
+    // Build a map of userIds to their username and role name
     final Map<String, Map<String, String>> userRoleNames = {};
-    for (var i = 0; i < userIds.length; i++) {
+    for (var i = 0; i < validEntries.length; i++) {
       final userId = userIds[i];
       final roleId = roleIds[i];
-      final userName = users
-          .firstWhere((user) => user.id == userId,
-              orElse: () => user.User.empty())
-          .name;
-      final roleName = roles
-          .firstWhere((role) => role.id == roleId, orElse: () => Role.empty())
-          .name;
-      userRoleNames[userId] = {'userName': userName, 'roleName': roleName};
+
+      // Find the user and role models
+      final userModel = users.firstWhere((u) => u.id == userId,
+          orElse: () => user.User.empty());
+      final roleModel =
+          roles.firstWhere((r) => r.id == roleId, orElse: () => Role.empty());
+
+      // Add to the map if both the user and role are valid
+      if (userModel.isNotEmpty && roleModel.isNotEmpty) {
+        userRoleNames[userId] = {
+          'userName': userModel.name,
+          'roleName': roleModel.name
+        };
+      }
     }
 
     return userRoleNames;

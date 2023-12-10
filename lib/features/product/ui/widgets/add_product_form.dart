@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/constants/route_paths.dart';
 import 'package:inventory_system/features/product/DAOs/product_dao.dart';
 import 'package:inventory_system/features/product/ui/pages/product_page.dart';
 import 'package:inventory_system/features/product/ui/widgets/product_form.dart';
@@ -64,7 +65,7 @@ class _AddProductFormState extends State<AddProductForm> {
       companyId: companyId!,
       onSubmit: (product) async {
         await productDAO.addProduct(product);
-        navigator.pushReplacementNoTransition(const ProductPage());
+        navigator.pushReplacementNamedNoTransition(RoutePaths.products);
       },
     );
   }

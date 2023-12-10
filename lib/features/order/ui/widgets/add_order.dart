@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/constants/route_paths.dart';
 import 'package:inventory_system/features/order/DAOs/order_dao.dart';
 import 'package:inventory_system/features/order/ui/pages/order_page.dart';
 import 'package:inventory_system/features/order/ui/widgets/order_form.dart';
@@ -61,7 +62,7 @@ class _AddOrderFormState extends State<AddOrderForm> {
       allProducts: products!,
       onSubmit: (order) async {
         await orderDAO.addOrder(order);
-        navigator.pushReplacementNoTransition(const OrderPage());
+        navigator.pushReplacementNamedNoTransition(RoutePaths.orders);
       },
     );
   }

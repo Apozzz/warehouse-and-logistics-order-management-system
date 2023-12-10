@@ -49,4 +49,13 @@ class OrderDAO {
       print(e);
     }
   }
+
+  Future<int> getTotalOrders(String companyId) async {
+    final QuerySnapshot snapshot = await _firestore
+        .collection('orders')
+        .where('companyId', isEqualTo: companyId)
+        .get();
+
+    return snapshot.docs.length;
+  }
 }

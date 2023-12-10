@@ -26,5 +26,9 @@ ThemeData buildTheme() {
         backgroundColor: Colors.black, // Text color for ElevatedButton
       ),
     ),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      foregroundColor: Colors.white, // Icon color for FAB
+      backgroundColor: Colors.black, // Background color for FAB
+    ),
   );
 }

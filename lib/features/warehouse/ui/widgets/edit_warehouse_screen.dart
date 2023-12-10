@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/constants/route_paths.dart';
 import 'package:inventory_system/features/warehouse/DAOs/warehouse_dao.dart';
 import 'package:inventory_system/features/warehouse/models/warehouse_model.dart';
 import 'package:inventory_system/features/warehouse/ui/pages/warehouse_page.dart';
@@ -94,8 +95,8 @@ class _EditWarehouseScreenState extends State<EditWarehouseScreen> {
                       await warehouseDAO.updateWarehouse(
                           updatedWarehouse.id, updatedWarehouse.toMap());
                     });
-                    Navigator.of(context)
-                        .pushReplacementNoTransition(const WarehousePage());
+                    Navigator.of(context).pushReplacementNamedNoTransition(
+                        RoutePaths.warehouses);
                   }
                 },
                 child: const Text('Save Changes'),

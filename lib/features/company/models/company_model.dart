@@ -61,4 +61,9 @@ class Company {
       userRoles: userRoles ?? this.userRoles,
     );
   }
+
+  @override
+  String toString() {
+    return 'Company{id: $id, name: $name, address: $address, createdAt: $createdAt, ceo: $ceo, userRoles: $userRoles}';
+  }
 }

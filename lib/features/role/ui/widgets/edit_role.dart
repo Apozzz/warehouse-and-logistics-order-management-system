@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/constants/route_paths.dart';
 import 'package:inventory_system/features/role/DAOs/role_dao.dart';
 import 'package:inventory_system/features/role/models/role_model.dart';
 import 'package:inventory_system/features/role/ui/pages/role_page.dart';
@@ -21,7 +22,6 @@ class _EditRoleScreenState extends State<EditRoleScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize with role data
     currentRole = widget.role;
   }
 
@@ -37,7 +37,7 @@ class _EditRoleScreenState extends State<EditRoleScreen> {
         onSubmit: (updatedRole) async {
           try {
             await roleDAO.updateRole(updatedRole);
-            navigator.pushReplacementNoTransition(const RolePage());
+            navigator.pushReplacementNamedNoTransition(RoutePaths.roles);
           } catch (e) {
             // Handle errors (e.g., show an error message)
             ScaffoldMessenger.of(context).showSnackBar(

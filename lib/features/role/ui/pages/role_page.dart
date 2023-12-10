@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/enums/app_page.dart';
+import 'package:inventory_system/enums/permission_type.dart';
 import 'package:inventory_system/features/role/ui/widgets/add_role.dart';
 import 'package:inventory_system/features/role/ui/widgets/role_list.dart';
 import 'package:inventory_system/shared/ui/widgets/base_scaffold.dart';
+import 'package:inventory_system/shared/ui/widgets/permission_controlled_action_button.dart';
 
 class RolePage extends StatelessWidget {
   const RolePage({Key? key}) : super(key: key);
@@ -13,11 +16,15 @@ class RolePage extends StatelessWidget {
         title: const Text('Roles'),
       ),
       body: const RoleList(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _showAddRoleForm(context);
-        },
-        child: const Icon(Icons.add),
+      floatingActionButton: PermissionControlledActionButton(
+        appPage: AppPage.Roles, // Specify the AppPage for the delivery
+        permissionType: PermissionType.Manage,
+        child: FloatingActionButton(
+          onPressed: () {
+            _showAddRoleForm(context);
+          },
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/enums/app_page.dart';
+import 'package:inventory_system/enums/permission_type.dart';
+import 'package:inventory_system/features/notification/services/notification_service.dart';
 import 'package:inventory_system/features/order/DAOs/order_dao.dart';
 import 'package:inventory_system/features/order/models/order_model.dart';
 import 'package:inventory_system/features/order/ui/widgets/edit_order.dart';
 import 'package:inventory_system/shared/hoc/with_company_id.dart';
+import 'package:inventory_system/shared/ui/widgets/permission_controlled_action_button.dart';
 import 'package:inventory_system/utils/pdf_generator.dart';
 import 'package:provider/provider.dart';
 
@@ -34,6 +38,8 @@ class _OrderListState extends State<OrderList> {
   @override
   Widget build(BuildContext context) {
     final navigator = Navigator.of(context);
+    final notification =
+        Provider.of<NotificationService>(context, listen: false);
 
     return FutureBuilder<List<Order>>(
       future: ordersFuture,
@@ -56,73 +62,87 @@ class _OrderListState extends State<OrderList> {
               title: Text('Order #${order.id}'),
               subtitle: Text(
                   'Total: ${order.total} - Date: ${order.createdAt.toString()}'),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.picture_as_pdf),
-                    onPressed: () async {
-                      try {
-                        final path = await pdfGenerator.generateOrderPdf(order);
-                        await pdfGenerator.openPdf(
-                            path); // Assuming you have an openPdf method
-                      } catch (e) {
-                        // Handle errors
-                        print("Error generating PDF: $e");
-                      }
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EditOrderScreen(order: order),
-                        ),
-                      ).then((_) {
-                        fetchOrdersWithCompanyId(); // Refresh the list when returning from the edit screen
-                      });
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: const Text('Delete Order'),
-                            content: Text(
-                                'Are you sure you want to delete Order #${order.id}?'),
-                            actions: [
-                              TextButton(
-                                child: const Text('Cancel'),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                              TextButton(
-                                child: const Text('Delete'),
-                                onPressed: () async {
-                                  await withCompanyId<void>(context,
-                                      (companyId) async {
-                                    final orderDAO = Provider.of<OrderDAO>(
-                                        context,
-                                        listen: false);
-                                    await orderDAO.deleteOrder(order.id);
-                                    navigator.pop();
-                                    fetchOrdersWithCompanyId(); // Refresh the list after deletion
-                                  });
-                                },
-                              ),
-                            ],
+              trailing: PermissionControlledActionButton(
+                appPage: AppPage.Orders,
+                permissionType: PermissionType.Manage,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.picture_as_pdf),
+                      onPressed: () async {
+                        try {
+                          final path = await pdfGenerator.generateOrderPdf(
+                            order,
+                            (String pdfPath) {
+                              notification.showNotification(
+                                0,
+                                'PDF Downloaded',
+                                'Your order PDF has been downloaded.',
+                              );
+                              pdfGenerator.openPdf(pdfPath); // Open the PDF
+                            },
                           );
-                        },
-                      );
-                    },
-                  ),
-                ],
+                          await pdfGenerator.openPdf(
+                              path); // Assuming you have an openPdf method
+                        } catch (e) {
+                          // Handle errors
+                          print("Error generating PDF: $e");
+                        }
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EditOrderScreen(order: order),
+                          ),
+                        ).then((_) {
+                          fetchOrdersWithCompanyId(); // Refresh the list when returning from the edit screen
+                        });
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text('Delete Order'),
+                              content: Text(
+                                  'Are you sure you want to delete Order #${order.id}?'),
+                              actions: [
+                                TextButton(
+                                  child: const Text('Cancel'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                                TextButton(
+                                  child: const Text('Delete'),
+                                  onPressed: () async {
+                                    await withCompanyId<void>(context,
+                                        (companyId) async {
+                                      final orderDAO = Provider.of<OrderDAO>(
+                                          context,
+                                          listen: false);
+                                      await orderDAO.deleteOrder(order.id);
+                                      navigator.pop();
+                                      fetchOrdersWithCompanyId(); // Refresh the list after deletion
+                                    });
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
             );
           },

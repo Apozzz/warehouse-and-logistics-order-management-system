@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/constants/route_paths.dart';
 import 'package:inventory_system/features/role/DAOs/role_dao.dart';
 import 'package:inventory_system/features/role/ui/pages/role_page.dart';
 import 'package:inventory_system/features/role/ui/widgets/role_form.dart';
@@ -56,8 +57,8 @@ class _AddRoleFormState extends State<AddRoleForm> {
       companyId: companyId!,
       onSubmit: (role) async {
         try {
-          await roleDAO.createRole(role.name, role.permissions, companyId!);
-          navigator.pushReplacementNoTransition(const RolePage());
+          await roleDAO.createRole(role.name, role.rolePermissions, companyId!);
+          navigator.pushReplacementNamedNoTransition(RoutePaths.roles);
         } catch (e) {
           // Handle errors (e.g., show an error message)
           ScaffoldMessenger.of(context).showSnackBar(

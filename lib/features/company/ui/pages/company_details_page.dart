@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/enums/app_page.dart';
+import 'package:inventory_system/enums/permission_type.dart';
+import 'package:inventory_system/features/authentication/viewmodels/auth_view_model.dart';
 import 'package:inventory_system/features/company/models/company_model.dart';
-import 'package:inventory_system/features/company/models/tempcode_model.dart';
 import 'package:inventory_system/features/company/services/company_service.dart';
+import 'package:inventory_system/features/company/ui/widgets/generate_temp_code.dart';
+import 'package:inventory_system/shared/services/permission_service.dart';
 import 'package:inventory_system/shared/ui/widgets/base_scaffold.dart';
+import 'package:inventory_system/shared/ui/widgets/permission_controlled_action_button.dart';
 import 'package:provider/provider.dart';
 
 class CompanyDetailsPage extends StatefulWidget {
@@ -26,24 +31,14 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final scaffoldMessanger = ScaffoldMessenger.of(context);
     return BaseScaffold(
       appBar: AppBar(
         title: Text(widget.company.name),
       ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.vpn_key),
-        onPressed: () async {
-          final companyService =
-              Provider.of<CompanyService>(context, listen: false);
-          const roleId = "..."; // replace with the role ID you want to use
-          final TempCode tempCode =
-              await companyService.generateTempCode(widget.company.id, roleId);
-          // Optionally, display the generated code to the user:
-          scaffoldMessanger.showSnackBar(
-            SnackBar(content: Text('Generated code: ${tempCode.code}')),
-          );
-        },
+      floatingActionButton: PermissionControlledActionButton(
+        appPage: AppPage.CompanyDetails,
+        permissionType: PermissionType.Manage,
+        child: GenerateTempCode(company: widget.company),
       ),
       body: FutureBuilder<Map<String, Map<String, String>>>(
         future: _userRoleNamesFuture,

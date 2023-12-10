@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/constants/route_paths.dart';
 import 'package:inventory_system/features/order/DAOs/order_dao.dart';
 import 'package:inventory_system/features/order/models/order_model.dart';
 import 'package:inventory_system/features/order/ui/pages/order_page.dart';
@@ -55,8 +56,8 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
         companyId: widget.order.companyId,
         onSubmit: (updatedOrder) async {
           await orderDAO.updateOrder(widget.order.id, updatedOrder.toMap());
-          navigator.pushReplacementNoTransition(
-              const OrderPage()); // Go back after updating order
+          navigator.pushReplacementNamedNoTransition(
+              RoutePaths.orders); // Go back after updating order
         },
       ),
     );

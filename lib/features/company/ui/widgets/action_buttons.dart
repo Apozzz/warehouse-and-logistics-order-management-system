@@ -1,6 +1,7 @@
 // file: lib/features/company/ui/widgets/action_buttons.dart
 
 import 'package:flutter/material.dart';
+import 'package:inventory_system/constants/route_paths.dart';
 import 'package:inventory_system/features/company/ui/pages/join_company_page.dart';
 import 'package:inventory_system/features/company/ui/widgets/create_company_form.dart';
 import 'package:inventory_system/shared/extensions/navigator_extension.dart';
@@ -33,7 +34,7 @@ class ActionButtons extends StatelessWidget {
           onPressed: () {
             // Navigate to Join Company Page
             Navigator.of(context)
-                .pushReplacementNoTransition(CompanyJoinPage());
+                .pushReplacementNamedNoTransition(RoutePaths.joinCompany);
           },
           child: const Text('Join Existing Company'),
         ),

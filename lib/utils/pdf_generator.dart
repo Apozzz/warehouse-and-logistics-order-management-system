@@ -1,11 +1,12 @@
 // utils/pdf_generator.dart
 import 'dart:io';
 import 'package:flutter/services.dart';
-import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:inventory_system/features/order/models/order_model.dart';
 import 'package:open_file/open_file.dart';
+
+typedef PdfGenerationCallback = void Function(String pdfPath);
 
 class PdfGenerator {
   Future<pw.Font> loadCustomFont(String path) async {
@@ -13,7 +14,8 @@ class PdfGenerator {
     return pw.Font.ttf(fontData.buffer.asByteData());
   }
 
-  Future<String> generateOrderPdf(Order order) async {
+  Future<String> generateOrderPdf(
+      Order order, PdfGenerationCallback onPdfGenerated) async {
     try {
       final pdf = pw.Document();
       // Load different font styles
@@ -66,6 +68,7 @@ class PdfGenerator {
       final output = await getTemporaryDirectory();
       final file = File("${output.path}/Order_${order.id}.pdf");
       await file.writeAsBytes(await pdf.save());
+      onPdfGenerated(file.path);
       return file.path;
     } catch (e) {
       print("Error generating PDF: $e");
@@ -74,7 +77,6 @@ class PdfGenerator {
   }
 
   Future<void> openPdf(String path) async {
-    final result = await OpenFile.open(path);
-    // Handle result if needed
+    await OpenFile.open(path);
   }
 }

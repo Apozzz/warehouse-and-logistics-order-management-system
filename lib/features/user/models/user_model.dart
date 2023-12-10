@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:inventory_system/utils/date_utils.dart';
 
 class User {
   final String id;
@@ -55,4 +54,12 @@ class User {
       companyIds: <String>[],
     );
   }
+
+  bool get isEmpty =>
+      id.isEmpty &&
+      name.isEmpty &&
+      email.isEmpty &&
+      phoneNumber.isEmpty &&
+      companyIds.isEmpty;
+  bool get isNotEmpty => !isEmpty;
 }

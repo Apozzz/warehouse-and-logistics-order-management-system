@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/enums/app_page.dart';
+import 'package:inventory_system/enums/permission_type.dart';
 import 'package:inventory_system/features/delivery/DAOs/delivery_dao.dart';
 import 'package:inventory_system/features/delivery/models/delivery_model.dart';
 import 'package:inventory_system/features/delivery/ui/widgets/edit_delivery_form.dart';
 import 'package:inventory_system/shared/hoc/with_company_id.dart';
+import 'package:inventory_system/shared/ui/widgets/permission_controlled_action_button.dart';
 import 'package:provider/provider.dart';
 
 class DeliveryList extends StatefulWidget {
@@ -54,62 +57,66 @@ class _DeliveryListState extends State<DeliveryList> {
               title: Text('Delivery ID: ${delivery.id}'),
               subtitle: Text(
                   'Order IDs: ${delivery.orderIds.join(", ")} - Status: ${delivery.status}'),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              EditDeliveryScreen(delivery: delivery),
-                        ),
-                      ).then((_) {
-                        fetchDeliveriesWithCompanyId(); // Refresh the list when returning from the edit screen
-                      });
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: const Text('Delete Delivery'),
-                            content: Text(
-                                'Are you sure you want to delete delivery with ID: ${delivery.id}?'),
-                            actions: [
-                              TextButton(
-                                child: const Text('Cancel'),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                              TextButton(
-                                child: const Text('Delete'),
-                                onPressed: () async {
-                                  await withCompanyId<void>(context,
-                                      (companyId) async {
-                                    final deliveryDAO =
-                                        Provider.of<DeliveryDAO>(context,
-                                            listen: false);
-                                    await deliveryDAO
-                                        .deleteDelivery(delivery.id);
-                                    navigator.pop();
-                                    fetchDeliveriesWithCompanyId(); // Refresh the list after deletion
-                                  });
-                                },
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ],
+              trailing: PermissionControlledActionButton(
+                appPage: AppPage.Delivery,
+                permissionType: PermissionType.Manage,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                EditDeliveryScreen(delivery: delivery),
+                          ),
+                        ).then((_) {
+                          fetchDeliveriesWithCompanyId(); // Refresh the list when returning from the edit screen
+                        });
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text('Delete Delivery'),
+                              content: Text(
+                                  'Are you sure you want to delete delivery with ID: ${delivery.id}?'),
+                              actions: [
+                                TextButton(
+                                  child: const Text('Cancel'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                                TextButton(
+                                  child: const Text('Delete'),
+                                  onPressed: () async {
+                                    await withCompanyId<void>(context,
+                                        (companyId) async {
+                                      final deliveryDAO =
+                                          Provider.of<DeliveryDAO>(context,
+                                              listen: false);
+                                      await deliveryDAO
+                                          .deleteDelivery(delivery.id);
+                                      navigator.pop();
+                                      fetchDeliveriesWithCompanyId(); // Refresh the list after deletion
+                                    });
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
             );
           },

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/constants/route_paths.dart';
 import 'package:inventory_system/features/vehicle/DAOs/vehicle_dao.dart';
 import 'package:inventory_system/features/vehicle/ui/pages/vehicle_page.dart';
 import 'package:inventory_system/features/vehicle/ui/widgets/vehicle_form.dart';
@@ -61,7 +62,7 @@ class _AddVehicleFormState extends State<AddVehicleForm> {
       allOrders: orders!,
       onSubmit: (vehicle) async {
         await vehicleDAO.addVehicle(vehicle);
-        navigator.pushReplacementNoTransition(const VehiclePage());
+        navigator.pushReplacementNamedNoTransition(RoutePaths.vehicles);
       },
     );
   }

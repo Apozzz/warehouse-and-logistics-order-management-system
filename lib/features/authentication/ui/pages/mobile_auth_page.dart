@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/features/authentication/viewmodels/auth_view_model.dart';
 import 'package:inventory_system/features/authentication/viewmodels/mobile_number_authentication_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -17,6 +18,8 @@ class _MobileNumberAuthPageState extends State<MobileNumberAuthPage> {
 
   @override
   Widget build(BuildContext context) {
+    final authModel = Provider.of<AuthViewModel>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mobile Number Authentication'),
@@ -55,11 +58,12 @@ class _MobileNumberAuthPageState extends State<MobileNumberAuthPage> {
                 keyboardType: TextInputType.number,
               ),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   final viewModel = Provider.of<MobileNumberAuthViewModel>(
                       context,
                       listen: false);
                   viewModel.verifyCode(_verificationCodeController.text);
+                  await authModel.redirectToCompanyPageIfLoggedIn(context);
                 },
                 child: const Text('Submit Verification Code'),
               ),

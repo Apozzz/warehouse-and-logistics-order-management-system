@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/constants/route_paths.dart';
 import 'package:inventory_system/features/product/DAOs/product_dao.dart';
 import 'package:inventory_system/features/product/models/product_model.dart';
 import 'package:inventory_system/features/product/ui/pages/product_page.dart';
@@ -56,7 +57,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
         onSubmit: (updatedProduct) async {
           await productDAO.updateProduct(
               widget.product.id, updatedProduct.toMap());
-          navigator.pushReplacementNoTransition(const ProductPage());
+          navigator.pushReplacementNamedNoTransition(RoutePaths.products);
         },
       ),
     );

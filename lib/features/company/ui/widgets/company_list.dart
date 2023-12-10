@@ -1,6 +1,7 @@
 // file: lib/features/company/ui/widgets/company_list.dart
 
 import 'package:flutter/material.dart';
+import 'package:inventory_system/constants/route_paths.dart';
 import 'package:inventory_system/features/company/models/company_model.dart';
 import 'package:inventory_system/features/company/ui/pages/company_details_page.dart';
 import 'package:inventory_system/shared/extensions/navigator_extension.dart';
@@ -20,11 +21,21 @@ class CompanyList extends StatelessWidget {
         final company = companies[index];
         return ListTile(
           title: Text(company.name),
-          onTap: () {
-            Provider.of<CompanyProvider>(context, listen: false).companyId =
-                company.id;
-            Navigator.of(context).pushReplacementNoTransition(
-                CompanyDetailsPage(company: company));
+          onTap: () async {
+            final companyProvider =
+                Provider.of<CompanyProvider>(context, listen: false);
+            await companyProvider.setCompanyId(
+                company.id); // Set the companyId and fetch details
+
+            if (companyProvider.company != null) {
+              Navigator.of(context)
+                  .pushReplacementNamedNoTransition(RoutePaths.home);
+            } else {
+              // Handle the case where company details couldn't be fetched
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Failed to load company details')),
+              );
+            }
           },
         );
       },

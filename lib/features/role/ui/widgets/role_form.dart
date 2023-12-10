@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/features/permissions/models/role_permission_model.dart';
+import 'package:inventory_system/features/permissions/ui/widgets/permission_multi_select.dart';
 import 'package:inventory_system/features/role/models/role_model.dart';
-import 'package:inventory_system/features/role/ui/widgets/permission_multiselect.dart';
 
 class RoleForm extends StatefulWidget {
   final Role? role;
@@ -21,14 +22,14 @@ class RoleForm extends StatefulWidget {
 class _RoleFormState extends State<RoleForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
-  Set<Permission> selectedPermissions = <Permission>{};
+  List<RolePermission> rolePermissions = [];
 
   @override
   void initState() {
     super.initState();
     if (widget.role != null) {
       _nameController.text = widget.role!.name;
-      selectedPermissions = widget.role!.permissions;
+      rolePermissions = widget.role!.rolePermissions;
     }
   }
 
@@ -62,10 +63,10 @@ class _RoleFormState extends State<RoleForm> {
             ),
             const SizedBox(height: 10),
             PermissionMultiSelect(
-              initialValue: selectedPermissions.toList(),
-              onSelectionChanged: (List<Permission> newSelected) {
+              initialPermissions: rolePermissions,
+              onSelectionChanged: (List<RolePermission> newPermissions) {
                 setState(() {
-                  selectedPermissions = Set.of(newSelected);
+                  rolePermissions = newPermissions;
                 });
               },
             ),
@@ -76,7 +77,7 @@ class _RoleFormState extends State<RoleForm> {
                   final newRole = Role(
                     id: widget.role?.id ?? '',
                     name: _nameController.text,
-                    permissions: selectedPermissions,
+                    rolePermissions: rolePermissions,
                     companyId: widget.companyId,
                   );
                   widget.onSubmit(newRole);

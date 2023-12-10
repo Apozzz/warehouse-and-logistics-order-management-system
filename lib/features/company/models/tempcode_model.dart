@@ -34,7 +34,7 @@ class TempCode {
     return {
       'code': code,
       'companyId': companyId,
-      'role': roleId,
+      'roleId': roleId,
       'expiration': expiration,
     };
   }

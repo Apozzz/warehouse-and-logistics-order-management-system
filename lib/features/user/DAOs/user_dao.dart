@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:inventory_system/enums/app_page.dart';
+import 'package:inventory_system/enums/permission_type.dart';
 import 'package:inventory_system/features/company/models/company_model.dart';
 import 'package:inventory_system/features/user/models/user_model.dart';
 
@@ -43,5 +45,23 @@ class UserDAO {
     return userDocs.docs
         .map((doc) => User.fromMap(doc.data(), doc.id))
         .toList();
+  }
+
+  Future<int> getTotalUsers(String companyId) async {
+    try {
+      final QuerySnapshot snapshot = await _db
+          .collection('users')
+          .where('companyIds',
+              arrayContains:
+                  companyId) // Assuming 'companyIds' is an array field
+          .get();
+
+      return snapshot.docs.length;
+    } catch (e) {
+      print('Error getting total users: $e');
+      // Decide on how you want to handle this error.
+      // For example, you could return -1 or re-throw the error after logging it.
+      throw Exception('Failed to get total users');
+    }
   }
 }
