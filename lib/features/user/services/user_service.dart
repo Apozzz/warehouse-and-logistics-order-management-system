@@ -2,17 +2,15 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:inventory_system/features/company/DAOs/company_dao.dart';
 import 'package:inventory_system/features/company/models/company_model.dart';
 import 'package:inventory_system/features/user/DAOs/user_dao.dart';
 import 'package:inventory_system/features/user/models/user_model.dart' as user;
 
 class UserService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  final CompanyDAO _companyDAO;
   final UserDAO _userDAO;
 
-  UserService(this._companyDAO, this._userDAO);
+  UserService(this._userDAO);
 
   Future<void> createUser(User firebaseUser) async {
     final docRef = _db.collection('users').doc(firebaseUser.uid);
@@ -38,5 +36,18 @@ class UserService {
 
   Future<List<Company>> getUserCompanies(User user) async {
     return _userDAO.getUserCompanies(user.uid);
+  }
+
+  Future<user.User?> getUserModelByFirebaseUserId(String firebaseUserId) async {
+    try {
+      final doc = await _db.collection('users').doc(firebaseUserId).get();
+      if (doc.exists) {
+        return user.User.fromMap(doc.data()!, doc.id);
+      }
+      return null; // Return null if the user is not found
+    } catch (e) {
+      print('Error getting user model: $e');
+      return null;
+    }
   }
 }

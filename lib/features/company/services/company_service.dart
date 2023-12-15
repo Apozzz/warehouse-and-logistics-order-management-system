@@ -149,43 +149,22 @@ class CompanyService {
     });
   }
 
-  Future<Map<String, Map<String, String>>> getUserRoleNames(
+  Future<List<Map<String, dynamic>>> getCompanyUsersWithRoles(
       Company company) async {
-    // Filter out user-role pairs where either the userId or roleId are empty
-    final validEntries = company.userRoles.entries
-        .where((entry) => entry.key.isNotEmpty && entry.value.isNotEmpty)
-        .toList();
-
-    // Extract the userIds and roleIds from the valid entries
-    final userIds = validEntries.map((e) => e.key).toList();
-    final roleIds = validEntries.map((e) => e.value).toList();
-
-    // Get the user and role models from the database
+    final userIds =
+        company.userRoles.keys.where((userId) => userId.isNotEmpty).toList();
     final users = await _userDAO.getUsersByIds(userIds);
+
+    final roleIds = company.userRoles.values.toList();
     final roles = await _roleDAO.getRolesByIds(roleIds);
 
-    // Build a map of userIds to their username and role name
-    final Map<String, Map<String, String>> userRoleNames = {};
-    for (var i = 0; i < validEntries.length; i++) {
-      final userId = userIds[i];
-      final roleId = roleIds[i];
-
-      // Find the user and role models
-      final userModel = users.firstWhere((u) => u.id == userId,
-          orElse: () => user.User.empty());
-      final roleModel =
-          roles.firstWhere((r) => r.id == roleId, orElse: () => Role.empty());
-
-      // Add to the map if both the user and role are valid
-      if (userModel.isNotEmpty && roleModel.isNotEmpty) {
-        userRoleNames[userId] = {
-          'userName': userModel.name,
-          'roleName': roleModel.name
-        };
-      }
-    }
-
-    return userRoleNames;
+    return users.map((user) {
+      final roleId = company.userRoles[user.id];
+      final roleName = roles
+          .firstWhere((role) => role.id == roleId, orElse: () => Role.empty())
+          .name;
+      return {'user': user, 'roleName': roleName};
+    }).toList();
   }
 
   String _generateRandomCode() {

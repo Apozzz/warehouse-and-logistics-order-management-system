@@ -23,7 +23,8 @@ extension NavigatorExtensions on NavigatorState {
           );
 
           return PermissionCheckedPage(
-              config: routeConfig); // Use the new widget
+              config: routeConfig,
+              routeArguments: arguments); // Use the new widget
         },
         transitionDuration: const Duration(seconds: 2),
       ),

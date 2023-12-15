@@ -15,5 +15,6 @@ class RoutePaths {
   static const String notifications = '/notifications';
   static const String logout = '/logout';
   static const String noAccess = '/noAccess';
+  static const String userDetails = '/userDetails';
   // Add more paths as needed
 }

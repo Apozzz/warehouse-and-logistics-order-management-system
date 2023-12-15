@@ -22,14 +22,6 @@
           }
         },
         {
-          "client_id": "535365513797-tcsuctc610af7e5vcdv7eds4vuni58fb.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.inventory_system",
-            "certificate_hash": "a36879e4508a16f6f2c273dc3f6d41f96400b1a0"
-          }
-        },
-        {
           "client_id": "535365513797-55r13m2vel1u7as98rni6osoc1h1ob3h.apps.googleusercontent.com",
           "client_type": 3
         }

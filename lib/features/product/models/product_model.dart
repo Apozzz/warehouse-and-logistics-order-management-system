@@ -11,6 +11,9 @@ class Product {
   final DateTime createdAt;
   final String companyId;
   final List<String>? categories; // Optional: for categorizing products
+  // final double height;
+  // final double length;
+  // final double width;
 
   Product({
     required this.id,
@@ -23,6 +26,9 @@ class Product {
     required this.createdAt,
     required this.companyId,
     this.categories,
+    // required this.height,
+    // required this.length,
+    // required this.width,
   });
 
   factory Product.fromMap(Map<String, dynamic> data, String documentId) {
@@ -46,6 +52,9 @@ class Product {
       createdAt: createdAt,
       companyId: data['companyId'] ?? '',
       categories: categories,
+      // height: data['height']?.toDouble() ?? 0.0,
+      // length: data['length']?.toDouble() ?? 0.0,
+      // width: data['width']?.toDouble() ?? 0.0,
     );
   }
 

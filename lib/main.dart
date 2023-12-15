@@ -101,9 +101,8 @@ void main() async {
       ),
       Provider<UserService>(
         create: (context) {
-          final companyDAO = Provider.of<CompanyDAO>(context, listen: false);
           final userDAO = Provider.of<UserDAO>(context, listen: false);
-          return UserService(companyDAO, userDAO);
+          return UserService(userDAO);
         },
       ),
       Provider<CompanyService>(
@@ -172,9 +171,12 @@ class MyApp extends StatelessWidget {
           ),
         );
 
+        WidgetBuilder builder =
+            routeConfig.builder ?? (_) => const Placeholder();
+
         return RouteGuard.generateRoute(
           settings,
-          routeConfig.builder,
+          builder,
           protected: routeConfig.isProtected,
           appPage: routeConfig.appPage,
           permissionService:

@@ -13,21 +13,29 @@ import 'package:inventory_system/features/notification/ui/pages/user_notificatio
 import 'package:inventory_system/features/order/ui/pages/order_page.dart';
 import 'package:inventory_system/features/product/ui/pages/product_page.dart';
 import 'package:inventory_system/features/role/ui/pages/role_page.dart';
+import 'package:inventory_system/features/user/models/user_model.dart';
+import 'package:inventory_system/features/user/ui/pages/user_details_form_page.dart';
 import 'package:inventory_system/features/vehicle/ui/pages/vehicle_page.dart';
 import 'package:inventory_system/features/warehouse/ui/pages/warehouse_page.dart';
 import 'package:inventory_system/shared/providers/company_provider.dart';
 import 'package:inventory_system/shared/ui/pages/no_access_page.dart';
 import 'package:provider/provider.dart';
 
+typedef RouteBuilder = Widget Function(BuildContext context);
+typedef RouteBuilderWithArgs = Widget Function(
+    BuildContext context, Object? args);
+
 class RouteConfig {
   final String path;
-  final WidgetBuilder builder;
+  final RouteBuilder? builder;
+  final RouteBuilderWithArgs? builderWithArgs;
   final bool isProtected;
   final AppPage? appPage; // Add this line
 
   RouteConfig({
     required this.path,
-    required this.builder,
+    this.builder,
+    this.builderWithArgs,
     this.isProtected = false,
     this.appPage, // Add this line
   });
@@ -71,6 +79,10 @@ final List<RouteConfig> routeConfigs = [
   RouteConfig(
     path: RoutePaths.noAccess,
     builder: (_) => const NoAccessPage(),
+  ),
+  RouteConfig(
+    path: RoutePaths.userDetails,
+    builderWithArgs: (_, args) => UserDetailsFormPage(user: args as User),
   ),
   RouteConfig(
     path: RoutePaths.dashboard,

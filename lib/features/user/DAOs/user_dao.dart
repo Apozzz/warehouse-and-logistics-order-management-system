@@ -64,4 +64,18 @@ class UserDAO {
       throw Exception('Failed to get total users');
     }
   }
+
+  Future<void> updateUser(User user) async {
+    await _db.collection('users').doc(user.id).update(user.toMap());
+  }
+
+  Future<void> deleteUser(String userId) async {
+    await _db.collection('users').doc(userId).delete();
+  }
+
+  Future<void> removeUserFromCompany(String userId, String companyId) async {
+    await _db.collection('companies').doc(companyId).update({
+      'userIds': FieldValue.arrayRemove([userId]),
+    });
+  }
 }

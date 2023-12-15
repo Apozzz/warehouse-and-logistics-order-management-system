@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:inventory_system/features/company/models/company_model.dart';
 import 'package:inventory_system/features/company/services/company_service.dart';
 import 'package:inventory_system/features/company/ui/widgets/role_selector.dart';
@@ -60,8 +61,22 @@ class _GenerateTempCodeState extends State<GenerateTempCode> {
         .generateTempCode(widget.company.id, selectedRoleId)
         .then((tempCode) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Generated code: ${tempCode.code}')),
+        SnackBar(
+          content: Text('Generated code: ${tempCode.code}'),
+          duration: const Duration(seconds: 2), // Adjust the duration as needed
+        ),
       );
+
+      // Delay the execution to allow the first SnackBar to be displayed
+      Future.delayed(const Duration(seconds: 2), () {
+        // Copy the code to the clipboard
+        Clipboard.setData(ClipboardData(text: tempCode.code)).then((_) {
+          // Show the second SnackBar to confirm that the code has been copied
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Code copied to clipboard')),
+          );
+        });
+      });
     }).catchError((error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error generating code: $error')),

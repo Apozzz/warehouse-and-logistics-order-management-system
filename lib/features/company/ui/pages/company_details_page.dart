@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:inventory_system/enums/app_page.dart';
 import 'package:inventory_system/enums/permission_type.dart';
-import 'package:inventory_system/features/authentication/viewmodels/auth_view_model.dart';
 import 'package:inventory_system/features/company/models/company_model.dart';
 import 'package:inventory_system/features/company/services/company_service.dart';
 import 'package:inventory_system/features/company/ui/widgets/generate_temp_code.dart';
-import 'package:inventory_system/shared/services/permission_service.dart';
+import 'package:inventory_system/features/user/models/user_model.dart';
+import 'package:inventory_system/features/user/ui/pages/user_details_form_page.dart';
 import 'package:inventory_system/shared/ui/widgets/base_scaffold.dart';
 import 'package:inventory_system/shared/ui/widgets/permission_controlled_action_button.dart';
 import 'package:provider/provider.dart';
@@ -20,13 +20,13 @@ class CompanyDetailsPage extends StatefulWidget {
 }
 
 class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
-  late Future<Map<String, Map<String, String>>> _userRoleNamesFuture;
+  late Future<List<Map<String, dynamic>>> _usersWithRolesFuture;
 
   @override
   void initState() {
     super.initState();
-    _userRoleNamesFuture = Provider.of<CompanyService>(context, listen: false)
-        .getUserRoleNames(widget.company);
+    _usersWithRolesFuture = Provider.of<CompanyService>(context, listen: false)
+        .getCompanyUsersWithRoles(widget.company);
   }
 
   @override
@@ -40,8 +40,8 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
         permissionType: PermissionType.Manage,
         child: GenerateTempCode(company: widget.company),
       ),
-      body: FutureBuilder<Map<String, Map<String, String>>>(
-        future: _userRoleNamesFuture,
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _usersWithRolesFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator();
@@ -50,15 +50,20 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Text('No users found');
           } else {
-            final userRoleNames = snapshot.data!;
+            final usersWithRoles = snapshot.data!;
             return ListView.builder(
-              itemCount: userRoleNames.length,
+              itemCount: usersWithRoles.length,
               itemBuilder: (context, index) {
-                final userId = userRoleNames.keys.elementAt(index);
-                final userName = userRoleNames[userId]!['userName']!;
-                final roleName = userRoleNames[userId]!['roleName']!;
+                final userWithRole = usersWithRoles[index];
+                final user = userWithRole['user'] as User;
+                final roleName = userWithRole['roleName'] as String;
                 return ListTile(
-                  title: Text('$userName - $roleName'),
+                  title: Text('${user.name} - $roleName'),
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => UserDetailsFormPage(user: user),
+                    ));
+                  },
                 );
               },
             );
