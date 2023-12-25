@@ -66,4 +66,12 @@ class ProductDAO {
       throw Exception('Failed to get total products');
     }
   }
+
+  Future<Product> getProductById(String productId) async {
+    final docSnapshot = await _db.collection('products').doc(productId).get();
+    if (docSnapshot.exists) {
+      return Product.fromMap(docSnapshot.data()!, docSnapshot.id);
+    }
+    throw Exception('Product not found');
+  }
 }

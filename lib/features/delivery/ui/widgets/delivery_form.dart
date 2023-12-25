@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:inventory_system/features/delivery/models/delivery_model.dart';
 import 'package:inventory_system/features/delivery/ui/widgets/delivery_status_selector.dart';
-import 'package:inventory_system/features/delivery/ui/widgets/vehicle_selector.dart';
+import 'package:inventory_system/features/vehicle/ui/widgets/vehicle_selector.dart';
 import 'package:inventory_system/features/order/models/order_model.dart';
 import 'package:inventory_system/features/vehicle/models/vehicle_model.dart';
-import 'package:inventory_system/features/delivery/ui/widgets/order_multi_select.dart';
+import 'package:inventory_system/features/order/ui/widgets/order_multi_select.dart';
 
 class DeliveryForm extends StatefulWidget {
   final Delivery? delivery; // Null if adding a new delivery
@@ -60,6 +60,10 @@ class _DeliveryFormState extends State<DeliveryForm> {
     return allOrders.where((order) => orderIds.contains(order.id)).toList();
   }
 
+  Set<String> extractCategoryIdsFromOrders(List<Order> orders) {
+    return orders.expand((order) => order.categories).toSet();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -87,14 +91,21 @@ class _DeliveryFormState extends State<DeliveryForm> {
             OrderMultiSelect(
               allOrders: widget.allOrders,
               initialSelectedOrders: _selectedOrders,
+              categoryIdsToCheck: _selectedVehicle?.allowedCategories ?? {},
               onSelectionChanged: (selectedOrders) {
-                _selectedOrders = selectedOrders;
+                setState(() {
+                  _selectedOrders = selectedOrders;
+                });
               },
             ),
             VehicleSelect(
+              allVehicles: widget.allVehicles,
               initialVehicle: _selectedVehicle,
+              categoryIdsToCheck: extractCategoryIdsFromOrders(_selectedOrders),
               onSelected: (vehicle) {
-                _selectedVehicle = vehicle;
+                setState(() {
+                  _selectedVehicle = vehicle;
+                });
               },
             ),
             DeliveryStatusSelect(

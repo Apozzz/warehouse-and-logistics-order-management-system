@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:inventory_system/constants/route_paths.dart';
+import 'package:inventory_system/features/category/services/category_service.dart';
 import 'package:inventory_system/features/company/models/company_model.dart';
 import 'package:inventory_system/features/company/ui/pages/company_details_page.dart';
 import 'package:inventory_system/shared/extensions/navigator_extension.dart';
@@ -24,10 +25,14 @@ class CompanyList extends StatelessWidget {
           onTap: () async {
             final companyProvider =
                 Provider.of<CompanyProvider>(context, listen: false);
+            final categoryService =
+                Provider.of<CategoryService>(context, listen: false);
             await companyProvider.setCompanyId(
                 company.id); // Set the companyId and fetch details
 
             if (companyProvider.company != null) {
+              await categoryService
+                  .initializeCategories(companyProvider.company!.id);
               Navigator.of(context)
                   .pushReplacementNamedNoTransition(RoutePaths.home);
             } else {

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:inventory_system/constants/route_paths.dart';
+import 'package:inventory_system/features/category/DAOs/category_dao.dart';
+import 'package:inventory_system/features/category/models/category_model.dart';
 import 'package:inventory_system/features/product/DAOs/product_dao.dart';
 import 'package:inventory_system/features/product/models/product_model.dart';
 import 'package:inventory_system/features/product/ui/pages/product_page.dart';
@@ -21,6 +23,8 @@ class EditProductScreen extends StatefulWidget {
 
 class _EditProductScreenState extends State<EditProductScreen> {
   List<Warehouse>? warehouses;
+  List<Category>? categories;
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -30,14 +34,18 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
   Future<void> _fetchData() async {
     final warehouseDAO = Provider.of<WarehouseDAO>(context, listen: false);
+    final categoryDAO = Provider.of<CategoryDAO>(context, listen: false);
 
     await withCompanyId<void>(context, (companyId) async {
       warehouses = await warehouseDAO.fetchWarehouses(companyId);
+      categories = await categoryDAO.fetchCategories(companyId);
     });
 
-    setState(() {
-      warehouses = warehouses;
-    });
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -45,13 +53,18 @@ class _EditProductScreenState extends State<EditProductScreen> {
     final productDAO = Provider.of<ProductDAO>(context, listen: false);
     final navigator = Navigator.of(context);
 
-    if (warehouses == null) {
+    if (isLoading) {
       return const CircularProgressIndicator();
+    }
+
+    if (warehouses == null || categories == null) {
+      return const Text('Data missing or not available.');
     }
 
     return Material(
       child: ProductForm(
         warehouses: warehouses!,
+        categories: categories!,
         product: widget.product,
         companyId: widget.product.companyId,
         onSubmit: (updatedProduct) async {

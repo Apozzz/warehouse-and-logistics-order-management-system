@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:inventory_system/constants/route_paths.dart';
+import 'package:inventory_system/features/category/DAOs/category_dao.dart';
+import 'package:inventory_system/features/category/models/category_model.dart';
 import 'package:inventory_system/features/vehicle/DAOs/vehicle_dao.dart';
 import 'package:inventory_system/features/vehicle/ui/pages/vehicle_page.dart';
 import 'package:inventory_system/features/vehicle/ui/widgets/vehicle_form.dart';
@@ -18,6 +20,7 @@ class AddVehicleForm extends StatefulWidget {
 
 class _AddVehicleFormState extends State<AddVehicleForm> {
   List<Order>? orders;
+  List<Category>? categories;
   String? companyId;
   bool isLoading = true;
 
@@ -29,10 +32,12 @@ class _AddVehicleFormState extends State<AddVehicleForm> {
 
   Future<void> _fetchData() async {
     final orderDAO = Provider.of<OrderDAO>(context, listen: false);
+    final categoryDAO = Provider.of<CategoryDAO>(context, listen: false);
 
     try {
       companyId = await withCompanyId<String>(context, (id) async {
         orders = await orderDAO.fetchOrders(id);
+        categories = await categoryDAO.fetchCategories(id);
         return id;
       });
     } finally {
@@ -53,13 +58,14 @@ class _AddVehicleFormState extends State<AddVehicleForm> {
       return const CircularProgressIndicator();
     }
 
-    if (orders == null || companyId == null) {
-      return const Text('No orders available or company ID is missing.');
+    if (orders == null || categories == null || companyId == null) {
+      return const Text('Data missing or not available.');
     }
 
     return VehicleForm(
       companyId: companyId!,
       allOrders: orders!,
+      allCategories: categories!,
       onSubmit: (vehicle) async {
         await vehicleDAO.addVehicle(vehicle);
         navigator.pushReplacementNamedNoTransition(RoutePaths.vehicles);

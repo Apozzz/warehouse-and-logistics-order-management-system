@@ -3,6 +3,7 @@ import 'package:inventory_system/constants/route_paths.dart';
 import 'package:inventory_system/enums/app_page.dart';
 import 'package:inventory_system/features/authentication/ui/pages/auth_selection_page.dart';
 import 'package:inventory_system/features/authentication/ui/pages/logout_page.dart';
+import 'package:inventory_system/features/category/ui/pages/category_page.dart';
 import 'package:inventory_system/features/company/ui/pages/company_details_page.dart';
 import 'package:inventory_system/features/company/ui/pages/company_page.dart';
 import 'package:inventory_system/features/company/ui/pages/create_company_page.dart';
@@ -125,5 +126,11 @@ final List<RouteConfig> routeConfigs = [
     builder: (_) => const WarehousePage(),
     isProtected: true,
     appPage: AppPage.Warehouses,
+  ),
+  RouteConfig(
+    path: RoutePaths.categories,
+    builder: (_) => const CategoryPage(),
+    isProtected: true,
+    appPage: AppPage.Categories,
   ),
 ];

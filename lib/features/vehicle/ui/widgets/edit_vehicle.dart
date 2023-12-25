@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:inventory_system/constants/route_paths.dart';
+import 'package:inventory_system/features/category/DAOs/category_dao.dart';
+import 'package:inventory_system/features/category/models/category_model.dart';
 import 'package:inventory_system/features/vehicle/DAOs/vehicle_dao.dart';
 import 'package:inventory_system/features/vehicle/models/vehicle_model.dart';
 import 'package:inventory_system/features/vehicle/ui/pages/vehicle_page.dart';
@@ -21,6 +23,7 @@ class EditVehicleScreen extends StatefulWidget {
 
 class _EditVehicleScreenState extends State<EditVehicleScreen> {
   List<Order>? orders;
+  List<Category>? categories;
 
   @override
   void initState() {
@@ -30,9 +33,11 @@ class _EditVehicleScreenState extends State<EditVehicleScreen> {
 
   Future<void> _fetchData() async {
     final orderDAO = Provider.of<OrderDAO>(context, listen: false);
+    final categoryDAO = Provider.of<CategoryDAO>(context, listen: false);
 
     await withCompanyId<void>(context, (companyId) async {
       orders = await orderDAO.fetchOrders(companyId);
+      categories = await categoryDAO.fetchCategories(companyId);
     });
 
     setState(() {
@@ -45,7 +50,7 @@ class _EditVehicleScreenState extends State<EditVehicleScreen> {
     final vehicleDAO = Provider.of<VehicleDAO>(context, listen: false);
     final navigator = Navigator.of(context);
 
-    if (orders == null) {
+    if (orders == null || categories == null) {
       return const CircularProgressIndicator();
     }
 
@@ -53,6 +58,7 @@ class _EditVehicleScreenState extends State<EditVehicleScreen> {
       child: VehicleForm(
         vehicle: widget.vehicle,
         allOrders: orders!,
+        allCategories: categories!,
         companyId: widget.vehicle.companyId,
         onSubmit: (updatedVehicle) async {
           await vehicleDAO.updateVehicle(

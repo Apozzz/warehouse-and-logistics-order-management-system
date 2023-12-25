@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:inventory_system/constants/route_paths.dart';
 import 'package:inventory_system/features/user/DAOs/user_dao.dart';
 import 'package:inventory_system/features/user/models/user_model.dart';
+import 'package:inventory_system/shared/extensions/navigator_extension.dart';
 import 'package:provider/provider.dart';
 
 class UserDetailsForm extends StatefulWidget {
@@ -29,8 +32,6 @@ class _UserDetailsFormState extends State<UserDetailsForm> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      setState(() => _isLoading = true);
-
       try {
         // Create a new User instance with updated values
         User updatedUser = User(
@@ -50,14 +51,14 @@ class _UserDetailsFormState extends State<UserDetailsForm> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('User updated successfully')),
         );
-        Navigator.of(context).pop(); // Navigate back on success
+        Navigator.of(context).pushReplacementNamedNoTransition(
+            RoutePaths.userDetails,
+            arguments: updatedUser); // Navigate back on success
       } catch (e) {
         // Handle any errors here
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Failed to update user')),
         );
-      } finally {
-        setState(() => _isLoading = false);
       }
     }
   }
@@ -80,8 +81,11 @@ class _UserDetailsFormState extends State<UserDetailsForm> {
             initialValue: _email,
             decoration: const InputDecoration(labelText: 'Email'),
             onSaved: (value) => _email = value!,
-            validator: (value) =>
-                value!.isEmpty ? 'Please enter an email' : null,
+            validator: FormBuilderValidators.compose([
+              FormBuilderValidators.required(
+                  errorText: 'Please enter an email'),
+              FormBuilderValidators.email(errorText: 'Enter a valid email'),
+            ]),
           ),
           // Phone Number field
           TextFormField(

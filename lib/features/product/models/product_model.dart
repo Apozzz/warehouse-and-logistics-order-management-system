@@ -10,7 +10,7 @@ class Product {
   final int quantity;
   final DateTime createdAt;
   final String companyId;
-  final List<String>? categories; // Optional: for categorizing products
+  final Set<String> categories; // Optional: for categorizing products
   // final double height;
   // final double length;
   // final double width;
@@ -25,7 +25,7 @@ class Product {
     required this.quantity,
     required this.createdAt,
     required this.companyId,
-    this.categories,
+    required this.categories,
     // required this.height,
     // required this.length,
     // required this.width,
@@ -36,9 +36,9 @@ class Product {
         ? (data['createdAt'] as Timestamp).toDate()
         : DateTime.now();
 
-    List<String>? categories;
+    Set<String>? categories;
     if (data['categories'] != null) {
-      categories = List<String>.from(data['categories']);
+      categories = Set<String>.from(data['categories']);
     }
 
     return Product(
@@ -51,7 +51,7 @@ class Product {
       quantity: data['quantity'] ?? 0,
       createdAt: createdAt,
       companyId: data['companyId'] ?? '',
-      categories: categories,
+      categories: categories ?? {},
       // height: data['height']?.toDouble() ?? 0.0,
       // length: data['length']?.toDouble() ?? 0.0,
       // width: data['width']?.toDouble() ?? 0.0,
@@ -83,7 +83,7 @@ class Product {
       quantity: 0,
       createdAt: DateTime.now(),
       companyId: '',
-      categories: null,
+      categories: {},
     );
   }
 }

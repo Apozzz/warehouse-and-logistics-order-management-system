@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/features/category/models/category_model.dart';
+import 'package:inventory_system/features/category/ui/widgets/category_multi_select.dart';
 import 'package:inventory_system/features/product/models/product_model.dart';
-import 'package:inventory_system/features/product/ui/widgets/warehouse_selector.dart';
+import 'package:inventory_system/features/warehouse/ui/widgets/warehouse_selector.dart';
 import 'package:inventory_system/features/warehouse/models/warehouse_model.dart';
 import 'package:inventory_system/utils/barcode_scanner.dart';
 
@@ -8,11 +10,13 @@ class ProductForm extends StatefulWidget {
   final Product? product;
   final String companyId;
   final List<Warehouse> warehouses;
+  final List<Category> categories; // Add this line
   final Function(Product) onSubmit;
 
   const ProductForm({
     required this.onSubmit,
     required this.warehouses,
+    required this.categories, // Add this line
     required this.companyId,
     this.product,
     Key? key,
@@ -30,6 +34,7 @@ class _ProductFormState extends State<ProductForm> {
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
   Warehouse? _selectedWarehouse;
+  List<Category> _selectedCategories = []; // Add this line
 
   @override
   void initState() {
@@ -49,6 +54,9 @@ class _ProductFormState extends State<ProductForm> {
               : (widget.warehouses.isNotEmpty
                   ? widget.warehouses.first
                   : Warehouse.empty());
+      _selectedCategories = widget.categories
+          .where((category) => widget.product!.categories.contains(category.id))
+          .toList();
     }
   }
 
@@ -156,6 +164,16 @@ class _ProductFormState extends State<ProductForm> {
               },
             ),
             const SizedBox(height: 20),
+            CategoryMultiSelect(
+              allCategories: widget.categories,
+              onSelectionChanged: (List<Category> selectedCategories) {
+                setState(() {
+                  _selectedCategories = selectedCategories;
+                });
+              },
+              initialSelectedCategories: _selectedCategories,
+            ),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
@@ -173,6 +191,7 @@ class _ProductFormState extends State<ProductForm> {
                             .now(), // Use existing createdAt or current time if it's a new product
                     companyId: widget
                         .companyId, // Use existing companyId or empty string if it's a new product
+                    categories: _selectedCategories.map((c) => c.id).toSet(),
                   );
 
                   widget.onSubmit(

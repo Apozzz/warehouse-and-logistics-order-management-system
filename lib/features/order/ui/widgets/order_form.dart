@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:inventory_system/features/order/models/oraderitem_model.dart';
 import 'package:inventory_system/features/order/models/order_model.dart';
+import 'package:inventory_system/features/order/services/order_service.dart';
 import 'package:inventory_system/features/product/models/product_model.dart';
-import 'package:inventory_system/features/order/ui/widgets/product_multi_select.dart';
+import 'package:inventory_system/features/product/ui/widgets/product_multi_select.dart';
+import 'package:provider/provider.dart';
 
 class OrderForm extends StatefulWidget {
   final Order? order; // Null if adding a new order
@@ -92,6 +94,26 @@ class _OrderFormState extends State<OrderForm> {
         0.0, (total, item) => total + (item.price * item.quantity));
   }
 
+  Future<void> _handleSubmit() async {
+    if (_formKey.currentState!.validate()) {
+      final orderService = Provider.of<OrderService>(context, listen: false);
+      // Use the orderService to aggregate categories
+      Set<String> aggregatedCategories = await orderService
+          .aggregateCategoriesFromOrderItems(_selectedOrderItems);
+      final order = Order(
+        id: widget.order?.id ?? '',
+        companyId: widget.companyId,
+        createdAt: widget.order?.createdAt ?? DateTime.now(),
+        items: _selectedOrderItems,
+        customerName: _customerNameController.text,
+        customerAddress: _customerAddressController.text,
+        total: _calculateTotal(),
+        categories: aggregatedCategories,
+      );
+      widget.onSubmit(order);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -126,20 +148,8 @@ class _OrderFormState extends State<OrderForm> {
                   _selectedProducts, // Ensure this is used correctly inside the widget
             ),
             ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  final order = Order(
-                    id: widget.order?.id ?? '', // Keep existing ID if editing
-                    companyId: widget.companyId,
-                    createdAt: widget.order?.createdAt ?? DateTime.now(),
-                    items: _selectedOrderItems,
-                    customerName: _customerNameController.text,
-                    customerAddress: _customerAddressController.text,
-                    total: _calculateTotal(),
-                  );
-                  widget.onSubmit(order);
-                  Navigator.pop(context);
-                }
+              onPressed: () async {
+                await _handleSubmit();
               },
               child: const Text('Submit'),
             ),

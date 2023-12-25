@@ -1,9 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:inventory_system/features/order/models/order_model.dart'
     as order;
+import 'package:inventory_system/features/product/DAOs/product_dao.dart';
+import 'package:inventory_system/features/product/models/product_model.dart';
 
 class OrderDAO {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final ProductDAO _productDAO;
+
+  OrderDAO(this._productDAO);
 
   Future<List<order.Order>> fetchOrders(String companyId) async {
     try {
@@ -57,5 +62,37 @@ class OrderDAO {
         .get();
 
     return snapshot.docs.length;
+  }
+
+  Future<List<Product>> getProductsInOrder(String orderId) async {
+    // Assume each order has a list of productIds
+    final orderSnapshot =
+        await _firestore.collection('orders').doc(orderId).get();
+    if (!orderSnapshot.exists) {
+      throw Exception('Order not found');
+    }
+    List<String> productIds =
+        List<String>.from(orderSnapshot.data()?['productIds'] ?? []);
+    return Future.wait(productIds.map((id) => _productDAO.getProductById(id)));
+  }
+
+  Future<order.Order?> getOrderById(String orderId) async {
+    try {
+      final DocumentSnapshot docSnapshot =
+          await _firestore.collection('orders').doc(orderId).get();
+
+      if (docSnapshot.exists) {
+        return order.Order.fromMap(
+            docSnapshot.data() as Map<String, dynamic>, docSnapshot.id);
+      } else {
+        // Handle the case where the order does not exist
+        print("Order not found");
+        return null;
+      }
+    } catch (e) {
+      // Handle exceptions
+      print("Error fetching order: $e");
+      return null;
+    }
   }
 }

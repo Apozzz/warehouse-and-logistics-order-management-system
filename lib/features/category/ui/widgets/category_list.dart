@@ -1,66 +1,86 @@
 import 'package:flutter/material.dart';
 import 'package:inventory_system/enums/app_page.dart';
 import 'package:inventory_system/enums/permission_type.dart';
-import 'package:inventory_system/features/vehicle/DAOs/vehicle_dao.dart';
-import 'package:inventory_system/features/vehicle/models/vehicle_model.dart';
-import 'package:inventory_system/features/vehicle/ui/widgets/edit_vehicle.dart';
+import 'package:inventory_system/features/category/DAOs/category_dao.dart';
+import 'package:inventory_system/features/category/models/category_model.dart';
+import 'package:inventory_system/features/category/ui/widgets/edit_category.dart';
 import 'package:inventory_system/shared/extensions/navigator_extension.dart';
 import 'package:inventory_system/shared/hoc/with_company_id.dart';
 import 'package:inventory_system/shared/ui/widgets/permission_controlled_action_button.dart';
 import 'package:provider/provider.dart';
 
-class VehicleList extends StatefulWidget {
-  const VehicleList({Key? key}) : super(key: key);
+class CategoryList extends StatefulWidget {
+  const CategoryList({Key? key}) : super(key: key);
 
   @override
-  _VehicleListState createState() => _VehicleListState();
+  _CategoryListState createState() => _CategoryListState();
 }
 
-class _VehicleListState extends State<VehicleList> {
-  late Future<List<Vehicle>> vehiclesFuture;
+class _CategoryListState extends State<CategoryList> {
+  late Future<List<Category>> categoriesFuture;
 
   @override
   void initState() {
     super.initState();
-    fetchVehiclesWithCompanyId();
+    fetchCategoriesWithCompanyId();
   }
 
-  Future<void> fetchVehiclesWithCompanyId() async {
+  Future<void> fetchCategoriesWithCompanyId() async {
     await withCompanyId(context, (companyId) async {
-      final vehicleDAO = Provider.of<VehicleDAO>(context, listen: false);
-      vehiclesFuture = vehicleDAO.fetchVehicles(companyId);
+      final categoryDAO = Provider.of<CategoryDAO>(context, listen: false);
+      categoriesFuture = categoryDAO.fetchCategories(companyId);
       setState(() {});
     });
+  }
+
+  String _getIncompatibleCategories(
+      List<Category> categories, Category category) {
+    String incompatibleCategoryNames = '';
+
+    for (var incompatibleCategoryId in category.incompatibleCategories) {
+      final incompatibleCategory = categories.firstWhere(
+        (cat) => cat.id == incompatibleCategoryId,
+        orElse: () => Category.empty(),
+      );
+      if (incompatibleCategory != Category.empty()) {
+        if (incompatibleCategoryNames.isNotEmpty) {
+          incompatibleCategoryNames += ', ';
+        }
+        incompatibleCategoryNames += incompatibleCategory.name;
+      }
+    }
+
+    return incompatibleCategoryNames;
   }
 
   @override
   Widget build(BuildContext context) {
     final navigator = Navigator.of(context);
 
-    return FutureBuilder<List<Vehicle>>(
-      future: vehiclesFuture,
+    return FutureBuilder<List<Category>>(
+      future: categoriesFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No vehicles found.'));
+          return const Center(child: Text('No categories found.'));
         }
 
-        List<Vehicle> vehicles = snapshot.data!;
+        List<Category> categories = snapshot.data!;
         return ListView.separated(
-          itemCount: vehicles.length,
+          itemCount: categories.length,
           separatorBuilder: (context, index) => const Divider(),
           itemBuilder: (context, index) {
-            final vehicle = vehicles[index];
+            final category = categories[index];
+
             return ListTile(
-              title: Text('Vehicle: ${vehicle.type}'),
+              title: Text(category.name),
               subtitle: Text(
-                  'Reg#: ${vehicle.registrationNumber} - Max Weight: ${vehicle.maxWeight} kg'),
+                  'Non-Compatible: ${_getIncompatibleCategories(categories, category)}'),
               trailing: PermissionControlledActionButton(
-                appPage:
-                    AppPage.Vehicles, // Specify the AppPage for the delivery
+                appPage: AppPage.Categories,
                 permissionType: PermissionType.Manage,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -69,7 +89,7 @@ class _VehicleListState extends State<VehicleList> {
                       icon: const Icon(Icons.edit),
                       onPressed: () {
                         Navigator.of(context).pushReplacementWidgetNoTransition(
-                            EditVehicleScreen(vehicle: vehicle));
+                            EditCategory(category: category));
                       },
                     ),
                     IconButton(
@@ -79,9 +99,9 @@ class _VehicleListState extends State<VehicleList> {
                           context: context,
                           builder: (context) {
                             return AlertDialog(
-                              title: const Text('Delete Vehicle'),
+                              title: const Text('Delete Category'),
                               content: Text(
-                                  'Are you sure you want to delete ${vehicle.type} with Reg#: ${vehicle.registrationNumber}?'),
+                                  'Are you sure you want to delete ${category.name}?'),
                               actions: [
                                 TextButton(
                                   child: const Text('Cancel'),
@@ -92,16 +112,13 @@ class _VehicleListState extends State<VehicleList> {
                                 TextButton(
                                   child: const Text('Delete'),
                                   onPressed: () async {
-                                    await withCompanyId<void>(context,
-                                        (companyId) async {
-                                      final vehicleDAO =
-                                          Provider.of<VehicleDAO>(context,
-                                              listen: false);
-                                      await vehicleDAO
-                                          .deleteVehicle(vehicle.id);
-                                      navigator.pop();
-                                      fetchVehiclesWithCompanyId(); // Refresh the list after deletion
-                                    });
+                                    final categoryDAO =
+                                        Provider.of<CategoryDAO>(context,
+                                            listen: false);
+                                    await categoryDAO
+                                        .deleteCategory(category.id);
+                                    navigator.pop();
+                                    fetchCategoriesWithCompanyId(); // Refresh the list after deletion
                                   },
                                 ),
                               ],

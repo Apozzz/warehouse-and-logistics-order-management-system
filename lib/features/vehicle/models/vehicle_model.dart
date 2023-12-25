@@ -8,6 +8,7 @@ class Vehicle {
   String registrationNumber;
   double distance;
   List<String> assignedOrderIds;
+  Set<String> allowedCategories;
 
   Vehicle({
     required this.id,
@@ -19,6 +20,7 @@ class Vehicle {
     required this.registrationNumber,
     this.distance = 0.0,
     this.assignedOrderIds = const [],
+    required this.allowedCategories,
   });
 
   // Factory constructor for creating a Vehicle from a map (e.g., from JSON)
@@ -33,6 +35,7 @@ class Vehicle {
       registrationNumber: map['registrationNumber'] ?? '',
       distance: map['distance']?.toDouble() ?? 0.0,
       assignedOrderIds: List<String>.from(map['assignedOrderIds'] ?? []),
+      allowedCategories: Set<String>.from(map['allowedCategories'] ?? []),
     );
   }
 
@@ -47,6 +50,7 @@ class Vehicle {
       registrationNumber: '', // Empty or default registration number
       distance: 0.0, // Default distance
       assignedOrderIds: const [],
+      allowedCategories: const {},
     );
   }
 
@@ -61,12 +65,17 @@ class Vehicle {
       'registrationNumber': registrationNumber,
       'distance': distance,
       'assignedOrderIds': assignedOrderIds,
+      'allowedCategories': allowedCategories,
     };
   }
 
   // Method to check if a product/load can be carried based on weight and volume
   bool canCarry(double weight, double volume) {
     return weight <= maxWeight && volume <= maxVolume;
+  }
+
+  bool canCarryCategory(String categoryId) {
+    return allowedCategories.contains(categoryId);
   }
 
   @override

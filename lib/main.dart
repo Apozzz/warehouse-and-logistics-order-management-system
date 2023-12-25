@@ -13,6 +13,8 @@ import 'package:inventory_system/features/authentication/viewmodels/email_passwo
 import 'package:inventory_system/features/authentication/viewmodels/facebook_authentication_view_model.dart';
 import 'package:inventory_system/features/authentication/viewmodels/google_authentication_view_model.dart';
 import 'package:inventory_system/features/authentication/viewmodels/mobile_number_authentication_view_model.dart';
+import 'package:inventory_system/features/category/DAOs/category_dao.dart';
+import 'package:inventory_system/features/category/services/category_service.dart';
 import 'package:inventory_system/features/company/DAOs/company_dao.dart';
 import 'package:inventory_system/features/company/services/company_service.dart';
 import 'package:inventory_system/features/company/ui/pages/company_page.dart';
@@ -21,6 +23,7 @@ import 'package:inventory_system/features/delivery/DAOs/delivery_dao.dart';
 import 'package:inventory_system/features/notification/DAOs/notification_dao.dart';
 import 'package:inventory_system/features/notification/services/notification_service.dart';
 import 'package:inventory_system/features/order/DAOs/order_dao.dart';
+import 'package:inventory_system/features/order/services/order_service.dart';
 import 'package:inventory_system/features/product/DAOs/product_dao.dart';
 import 'package:inventory_system/features/role/DAOs/role_dao.dart';
 import 'package:inventory_system/features/user/DAOs/user_dao.dart';
@@ -88,7 +91,10 @@ void main() async {
         create: (context) => ProductDAO(),
       ),
       Provider<OrderDAO>(
-        create: (context) => OrderDAO(),
+        create: (context) {
+          final productDAO = Provider.of<ProductDAO>(context, listen: false);
+          return OrderDAO(productDAO);
+        },
       ),
       Provider<VehicleDAO>(
         create: (context) => VehicleDAO(),
@@ -98,6 +104,9 @@ void main() async {
       ),
       Provider<NotificationDAO>(
         create: (_) => NotificationDAO(),
+      ),
+      Provider<CategoryDAO>(
+        create: (context) => CategoryDAO(),
       ),
       Provider<UserService>(
         create: (context) {
@@ -145,6 +154,19 @@ void main() async {
       Provider<NavigationManager>(
         create: (context) => NavigationManager(
           Provider.of<PermissionService>(context, listen: false),
+        ),
+      ),
+      Provider<CategoryService>(
+        create: (context) => CategoryService(
+          Provider.of<CategoryDAO>(context, listen: false),
+          Provider.of<ProductDAO>(context, listen: false),
+          Provider.of<OrderDAO>(context, listen: false),
+          Provider.of<VehicleDAO>(context, listen: false),
+        ),
+      ),
+      Provider<OrderService>(
+        create: (context) => OrderService(
+          Provider.of<ProductDAO>(context, listen: false),
         ),
       ),
     ], child: const MyApp()),

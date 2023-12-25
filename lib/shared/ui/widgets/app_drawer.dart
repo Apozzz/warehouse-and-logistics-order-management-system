@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:inventory_system/constants/route_paths.dart';
 import 'package:inventory_system/enums/app_page.dart';
-import 'package:inventory_system/features/authentication/viewmodels/auth_view_model.dart';
 import 'package:inventory_system/shared/managers/navigation_manager.dart';
 import 'package:inventory_system/shared/providers/company_provider.dart';
 import 'package:provider/provider.dart';
@@ -26,14 +25,11 @@ class AppDrawer extends StatelessWidget {
               style: TextStyle(color: Colors.white, fontSize: 24),
             ),
           ),
-          // Use FutureBuilders to build each item based on permissions
+          _createDrawerItemFuture(context, 'Companies',
+              RoutePaths.selectCompany, null, navigationManager),
           if (companyId != null) ...[
-            _createDrawerItemFuture(
-                context,
-                'Companies',
-                RoutePaths.selectCompany,
-                AppPage.CompanyDetails,
-                navigationManager),
+            _createDrawerItemFuture(context, 'Categories',
+                RoutePaths.categories, AppPage.Categories, navigationManager),
             _createDrawerItemFuture(context, 'Products', RoutePaths.products,
                 AppPage.Products, navigationManager),
             _createDrawerItemFuture(context, 'Warehouses',
@@ -47,21 +43,15 @@ class AppDrawer extends StatelessWidget {
             _createDrawerItemFuture(context, 'Roles', RoutePaths.roles,
                 AppPage.Roles, navigationManager),
           ],
-          ListTile(
-            title: const Text('Logout'),
-            onTap: () {
-              Provider.of<AuthViewModel>(context, listen: false).signOut();
-              // Assuming you navigate to the login page after logout
-              Navigator.of(context).pushReplacementNamed(RoutePaths.auth);
-            },
-          ),
+          _createDrawerItemFuture(
+              context, 'Logout', RoutePaths.auth, null, navigationManager),
         ],
       ),
     );
   }
 
   Widget _createDrawerItemFuture(BuildContext context, String title,
-      String route, AppPage appPage, NavigationManager navigationManager) {
+      String route, AppPage? appPage, NavigationManager navigationManager) {
     return FutureBuilder<Widget>(
       future: navigationManager.createNavItem(
           context, title, Icons.circle, route, appPage),

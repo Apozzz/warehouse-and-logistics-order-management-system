@@ -1,5 +1,6 @@
 enum AppPage {
   CompanyDetails,
+  Categories,
   Dashboard,
   Delivery,
   Orders,

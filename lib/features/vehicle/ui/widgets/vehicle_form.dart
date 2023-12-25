@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/features/category/models/category_model.dart';
+import 'package:inventory_system/features/category/ui/widgets/category_multi_select.dart';
 import 'package:inventory_system/features/order/models/order_model.dart';
 import 'package:inventory_system/features/vehicle/models/vehicle_model.dart';
-import 'package:inventory_system/features/delivery/ui/widgets/order_multi_select.dart';
 
 class VehicleForm extends StatefulWidget {
   final Vehicle? vehicle; // Null if adding a new vehicle
   final String companyId;
   final List<Order> allOrders;
   final Function(Vehicle) onSubmit;
+  final List<Category> allCategories; // Add this line
 
   const VehicleForm({
     Key? key,
     this.vehicle,
     required this.companyId,
     required this.allOrders,
+    required this.allCategories,
     required this.onSubmit,
   }) : super(key: key);
 
@@ -29,6 +32,7 @@ class _VehicleFormState extends State<VehicleForm> {
   double _maxVolume = 0.0;
   bool _availability = true;
   List<Order> _selectedOrders = [];
+  List<Category> _selectedAllowedCategories = [];
 
   @override
   void initState() {
@@ -42,12 +46,27 @@ class _VehicleFormState extends State<VehicleForm> {
       _availability = widget.vehicle!.availability;
       _selectedOrders = mapOrderIdsToOrders(
           widget.vehicle!.assignedOrderIds, widget.allOrders);
+      _selectedAllowedCategories = mapCategoryIdsToCategories(
+          widget.vehicle!.allowedCategories, widget.allCategories);
     }
+  }
+
+  List<Category> mapCategoryIdsToCategories(
+      Set<String> categoryIds, List<Category> allCategories) {
+    return allCategories
+        .where((category) => categoryIds.contains(category.id))
+        .toList();
   }
 
   List<Order> mapOrderIdsToOrders(
       List<String> orderIds, List<Order> allOrders) {
     return allOrders.where((order) => orderIds.contains(order.id)).toList();
+  }
+
+  void _onAllowedCategorySelectionChanged(List<Category> selectedCategories) {
+    setState(() {
+      _selectedAllowedCategories = selectedCategories;
+    });
   }
 
   @override
@@ -122,12 +141,20 @@ class _VehicleFormState extends State<VehicleForm> {
                 });
               },
             ),
+            CategoryMultiSelect(
+              allCategories: widget.allCategories,
+              onSelectionChanged: _onAllowedCategorySelectionChanged,
+              initialSelectedCategories: _selectedAllowedCategories,
+            ),
             ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
                   _formKey.currentState!.save();
                   final assignedOrderIds =
                       _selectedOrders.map((order) => order.id).toList();
+                  final allowedCategoryIds = _selectedAllowedCategories
+                      .map((category) => category.id)
+                      .toSet();
                   final newVehicle = Vehicle(
                     id: widget.vehicle?.id ?? '', // Keep existing ID if editing
                     companyId: widget.companyId,
@@ -137,6 +164,7 @@ class _VehicleFormState extends State<VehicleForm> {
                     maxVolume: _maxVolume,
                     availability: _availability,
                     assignedOrderIds: assignedOrderIds,
+                    allowedCategories: allowedCategoryIds,
                   );
                   widget.onSubmit(newVehicle);
                   Navigator.pop(context);

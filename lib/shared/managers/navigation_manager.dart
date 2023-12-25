@@ -32,16 +32,24 @@ class NavigationManager {
   }
 
   Future<Widget> createNavItem(BuildContext context, String title,
-      IconData icon, String route, AppPage appPage) async {
+      IconData icon, String route, AppPage? appPage) async {
     bool hasPermission =
-        await _permissionService.hasPermission(appPage, PermissionType.View);
+        true; // Default to true for pages that don't require specific permissions
+
+    // Check permissions only for items associated with an AppPage
+    if (appPage != null) {
+      hasPermission =
+          await _permissionService.hasPermission(appPage, PermissionType.View);
+    }
+
     if (hasPermission) {
       return ListTile(
         title: Text(title),
         leading: Icon(icon),
-        selected: _currentIndex == appPage.index && !_isDrawerItemActive,
+        selected: _currentIndex == appPage?.index && !_isDrawerItemActive,
         onTap: () {
-          setCurrentIndex(appPage.index, isDrawerItem: true);
+          setCurrentIndex(appPage?.index ?? -1,
+              isDrawerItem: true); // Use ?? to handle null
           navigate(context, route);
         },
       );

@@ -78,5 +78,14 @@ class VehicleDAO {
     return orders;
   }
 
+  Future<Vehicle> getVehicleById(String vehicleId) async {
+    final docSnapshot =
+        await _firestore.collection('vehicles').doc(vehicleId).get();
+    if (docSnapshot.exists) {
+      return Vehicle.fromMap(docSnapshot.data()!, docSnapshot.id);
+    }
+    throw Exception('Vehicle not found');
+  }
+
   // Additional methods as needed...
 }

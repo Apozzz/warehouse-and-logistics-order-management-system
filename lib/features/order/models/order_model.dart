@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:inventory_system/features/order/models/oraderitem_model.dart';
+import 'package:inventory_system/features/product/DAOs/product_dao.dart';
 
 class Order {
   final String id;
@@ -9,6 +10,7 @@ class Order {
   final String customerName;
   final String customerAddress;
   final double total;
+  final Set<String> categories; // New field to store unique categories
 
   Order({
     required this.id,
@@ -18,6 +20,7 @@ class Order {
     required this.customerName,
     required this.customerAddress,
     required this.total,
+    required this.categories,
   });
 
   factory Order.empty() {
@@ -29,6 +32,7 @@ class Order {
       customerName: '',
       customerAddress: '',
       total: 0,
+      categories: {}, // Empty set for categories
     );
   }
 
@@ -52,6 +56,7 @@ class Order {
       customerName: data['customerName'] ?? '',
       customerAddress: data['customerAddress'] ?? '',
       total: data['total'] ?? 0,
+      categories: Set<String>.from(data['categories'] ?? []),
     );
   }
 
@@ -63,6 +68,7 @@ class Order {
       'customerName': customerName,
       'customerAddress': customerAddress,
       'total': total,
+      'categories': categories.toList(), // Store the categories as a list
     };
   }
 }
