@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:inventory_system/enums/delivery_status.dart';
 import 'package:inventory_system/features/delivery/models/delivery_model.dart';
 
 class DeliveryDAO {
@@ -34,6 +35,16 @@ class DeliveryDAO {
     }).toList();
   }
 
+  Future<Delivery> getDeliveryById(String deliveryId) async {
+    final docSnapshot =
+        await _db.collection('deliveries').doc(deliveryId).get();
+    if (docSnapshot.exists) {
+      return Delivery.fromMap(
+          docSnapshot.data() as Map<String, dynamic>, docSnapshot.id);
+    }
+    throw Exception('Delivery not found');
+  }
+
   // Updates a delivery
   Future<void> updateDelivery(
       String deliveryId, Map<String, dynamic> updatedData) async {
@@ -52,5 +63,32 @@ class DeliveryDAO {
         .get();
 
     return snapshot.docs.length; // Returns the count of documents
+  }
+
+  Future<List<Delivery>> fetchNotStartedDeliveries(String companyId) async {
+    final QuerySnapshot snapshot = await _db
+        .collection('deliveries')
+        .where('companyId', isEqualTo: companyId)
+        .where('status', isEqualTo: DeliveryStatus.NotStarted.index)
+        .get();
+
+    return snapshot.docs.map((doc) {
+      return Delivery.fromMap(doc.data() as Map<String, dynamic>, doc.id);
+    }).toList();
+  }
+
+  Future<List<Delivery>> fetchPackagingDeliveries(String companyId) async {
+    final QuerySnapshot snapshot = await _db
+        .collection('deliveries')
+        .where('companyId', isEqualTo: companyId)
+        .where('status', whereIn: [
+      DeliveryStatus.NotStarted.index,
+      DeliveryStatus.Preparing.index
+    ]).get();
+
+    return snapshot.docs
+        .map((doc) =>
+            Delivery.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+        .toList();
   }
 }

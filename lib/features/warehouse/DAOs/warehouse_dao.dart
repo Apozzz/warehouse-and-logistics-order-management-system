@@ -26,4 +26,15 @@ class WarehouseDAO {
       return Warehouse.fromMap(doc.data() as Map<String, dynamic>, doc.id);
     }).toList();
   }
+
+  Future<Warehouse> getWarehouseById(String warehouseId) async {
+    final docSnapshot =
+        await _db.collection('warehouses').doc(warehouseId).get();
+    if (docSnapshot.exists) {
+      return Warehouse.fromMap(
+          docSnapshot.data() as Map<String, dynamic>, docSnapshot.id);
+    } else {
+      throw Exception('Warehouse not found');
+    }
+  }
 }

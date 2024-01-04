@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:inventory_system/enums/permission_type.dart';
 import 'package:inventory_system/shared/guards/route_config.dart';
 import 'package:inventory_system/shared/services/permission_service.dart';
 import 'package:inventory_system/shared/ui/pages/no_access_page.dart';
@@ -31,18 +30,23 @@ class PermissionCheckedPage extends StatelessWidget {
     );
   }
 
-  Future<bool> _checkPermissions(BuildContext context) {
+  Future<bool> _checkPermissions(BuildContext context) async {
     if (config.appPage == null) {
       return Future.value(true);
     }
 
     final permissionService =
         Provider.of<PermissionService>(context, listen: false);
-    return permissionService.hasPermission(
-        config.appPage!, PermissionType.View);
+    final permissions =
+        await permissionService.fetchViewPermissions(config.appPage!);
+
+    return Future.value(permissions.viewAll || permissions.viewSelf);
   }
 
   Widget _buildPage(BuildContext context) {
+    print('here');
+    print('${context} -- context');
+    print('${routeArguments} -- arguments');
     if (config.builder != null) {
       return config
           .builder!(context); // Use the non-null assertion operator (!) here

@@ -4,6 +4,7 @@ import 'package:inventory_system/enums/permission_type.dart';
 import 'package:inventory_system/features/delivery/DAOs/delivery_dao.dart';
 import 'package:inventory_system/features/delivery/models/delivery_model.dart';
 import 'package:inventory_system/features/delivery/ui/widgets/edit_delivery_form.dart';
+import 'package:inventory_system/features/packages/DAOs/package_progress_dao.dart';
 import 'package:inventory_system/shared/hoc/with_company_id.dart';
 import 'package:inventory_system/shared/ui/widgets/permission_controlled_action_button.dart';
 import 'package:provider/provider.dart';
@@ -97,16 +98,32 @@ class _DeliveryListState extends State<DeliveryList> {
                                 TextButton(
                                   child: const Text('Delete'),
                                   onPressed: () async {
-                                    await withCompanyId<void>(context,
-                                        (companyId) async {
+                                    try {
+                                      // Attempt to delete package progress associated with the delivery
+                                      final packageProgressDAO =
+                                          Provider.of<PackageProgressDAO>(
+                                              context,
+                                              listen: false);
+                                      await packageProgressDAO
+                                          .deletePackageProgressByDeliveryId(
+                                              delivery.id);
+
+                                      // Proceed with deleting the delivery
                                       final deliveryDAO =
                                           Provider.of<DeliveryDAO>(context,
                                               listen: false);
                                       await deliveryDAO
                                           .deleteDelivery(delivery.id);
-                                      navigator.pop();
+
+                                      navigator.pop(); // Close the dialog
                                       fetchDeliveriesWithCompanyId(); // Refresh the list after deletion
-                                    });
+                                    } catch (e) {
+                                      navigator.pop(); // Close the dialog
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(content: Text('Error: $e')),
+                                      );
+                                    }
                                   },
                                 ),
                               ],

@@ -12,6 +12,7 @@ import 'package:inventory_system/features/dashboard/ui/pages/dashboard_page.dart
 import 'package:inventory_system/features/delivery/ui/pages/delivery_page.dart';
 import 'package:inventory_system/features/notification/ui/pages/user_notifications_page.dart';
 import 'package:inventory_system/features/order/ui/pages/order_page.dart';
+import 'package:inventory_system/features/packages/ui/pages/package_progress_overview_page.dart';
 import 'package:inventory_system/features/product/ui/pages/product_page.dart';
 import 'package:inventory_system/features/role/ui/pages/role_page.dart';
 import 'package:inventory_system/features/user/models/user_model.dart';
@@ -132,5 +133,12 @@ final List<RouteConfig> routeConfigs = [
     builder: (_) => const CategoryPage(),
     isProtected: true,
     appPage: AppPage.Categories,
+  ),
+  RouteConfig(
+    path: RoutePaths.packaging,
+    builderWithArgs: (_, args) =>
+        PackageProgressOverviewPage(canViewAll: args as bool),
+    isProtected: true,
+    appPage: AppPage.Packaging,
   ),
 ];

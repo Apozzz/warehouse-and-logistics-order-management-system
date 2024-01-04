@@ -9,4 +9,5 @@ enum AppPage {
   Users,
   Vehicles,
   Warehouses,
+  Packaging,
 }

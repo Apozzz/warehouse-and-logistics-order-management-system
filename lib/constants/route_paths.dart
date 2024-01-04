@@ -17,5 +17,6 @@ class RoutePaths {
   static const String noAccess = '/noAccess';
   static const String userDetails = '/userDetails';
   static const String categories = '/categories';
+  static const String packaging = '/packaging';
   // Add more paths as needed
 }

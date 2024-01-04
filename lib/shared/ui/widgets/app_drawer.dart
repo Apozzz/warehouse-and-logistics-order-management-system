@@ -44,7 +44,7 @@ class AppDrawer extends StatelessWidget {
                 AppPage.Roles, navigationManager),
           ],
           _createDrawerItemFuture(
-              context, 'Logout', RoutePaths.auth, null, navigationManager),
+              context, 'Logout', RoutePaths.logout, null, navigationManager),
         ],
       ),
     );

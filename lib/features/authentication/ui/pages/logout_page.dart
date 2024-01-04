@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/constants/route_paths.dart';
 import 'package:inventory_system/features/authentication/viewmodels/auth_view_model.dart';
+import 'package:inventory_system/shared/extensions/navigator_extension.dart';
 import 'package:inventory_system/shared/providers/company_provider.dart';
 import 'package:inventory_system/shared/ui/widgets/base_scaffold.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +24,8 @@ class LogoutPage extends StatelessWidget {
                 Provider.of<AuthViewModel>(context, listen: false);
             companyProvider.setCompanyId(null);
             authViewModel.signOut();
+            Navigator.of(context)
+                .pushReplacementNamedNoTransition(RoutePaths.auth);
           },
           child: const Text('Logout'),
         ),

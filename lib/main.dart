@@ -24,6 +24,8 @@ import 'package:inventory_system/features/notification/DAOs/notification_dao.dar
 import 'package:inventory_system/features/notification/services/notification_service.dart';
 import 'package:inventory_system/features/order/DAOs/order_dao.dart';
 import 'package:inventory_system/features/order/services/order_service.dart';
+import 'package:inventory_system/features/packages/DAOs/package_progress_dao.dart';
+import 'package:inventory_system/features/packages/services/packaging_service.dart';
 import 'package:inventory_system/features/product/DAOs/product_dao.dart';
 import 'package:inventory_system/features/role/DAOs/role_dao.dart';
 import 'package:inventory_system/features/user/DAOs/user_dao.dart';
@@ -47,8 +49,49 @@ void main() async {
   );
   runApp(
     MultiProvider(providers: [
+      Provider<UserDAO>(create: (_) => UserDAO()),
+      Provider<RoleDAO>(create: (_) => RoleDAO()),
+      Provider<CompanyDAO>(create: (_) => CompanyDAO()),
+      Provider<PackageProgressDAO>(create: (_) => PackageProgressDAO()),
+      Provider<DeliveryDAO>(create: (_) => DeliveryDAO()),
+      Provider<VehicleDAO>(create: (_) => VehicleDAO()),
+      Provider<NotificationDAO>(create: (_) => NotificationDAO()),
+      Provider<CategoryDAO>(create: (_) => CategoryDAO()),
+      Provider<WarehouseDAO>(create: (_) => WarehouseDAO()),
+      Provider<ProductDAO>(create: (_) => ProductDAO()),
+      Provider<OrderDAO>(
+        create: (context) {
+          final productDAO = Provider.of<ProductDAO>(context, listen: false);
+          return OrderDAO(productDAO);
+        },
+      ),
+      Provider<DashboardDataService>(create: (_) => DashboardDataService()),
+      ChangeNotifierProvider(create: (_) => NavigationProvider()),
       ChangeNotifierProvider(
-        create: (context) => AuthViewModel(),
+        create: (context) => CompanyProvider(
+          Provider.of<CompanyDAO>(context, listen: false),
+        ),
+      ),
+      ChangeNotifierProvider(create: (_) => AuthViewModel()),
+      Provider<PackagingService>(
+        create: (context) => PackagingService(
+          Provider.of<PackageProgressDAO>(context, listen: false),
+          Provider.of<DeliveryDAO>(context, listen: false),
+        ),
+      ),
+      Provider<PermissionService>(
+        create: (context) => PermissionService(
+          Provider.of<RoleDAO>(context, listen: false),
+          Provider.of<CompanyDAO>(context, listen: false),
+          Provider.of<AuthViewModel>(context, listen: false),
+          Provider.of<CompanyProvider>(context, listen: false),
+        ),
+      ),
+      Provider<UserService>(
+        create: (context) => UserService(
+          Provider.of<UserDAO>(context, listen: false),
+          Provider.of<PermissionService>(context, listen: false),
+        ),
       ),
       ChangeNotifierProvider(
         create: (context) => GoogleAuthViewModel(
@@ -74,46 +117,6 @@ void main() async {
           Provider.of<AuthViewModel>(context, listen: false),
         ),
       ),
-      ChangeNotifierProvider(create: (context) => NavigationProvider()),
-      Provider<CompanyDAO>(
-        create: (context) => CompanyDAO(),
-      ),
-      Provider<UserDAO>(
-        create: (context) => UserDAO(),
-      ),
-      Provider<RoleDAO>(
-        create: (context) => RoleDAO(),
-      ),
-      Provider<WarehouseDAO>(
-        create: (context) => WarehouseDAO(),
-      ),
-      Provider<ProductDAO>(
-        create: (context) => ProductDAO(),
-      ),
-      Provider<OrderDAO>(
-        create: (context) {
-          final productDAO = Provider.of<ProductDAO>(context, listen: false);
-          return OrderDAO(productDAO);
-        },
-      ),
-      Provider<VehicleDAO>(
-        create: (context) => VehicleDAO(),
-      ),
-      Provider<DeliveryDAO>(
-        create: (context) => DeliveryDAO(),
-      ),
-      Provider<NotificationDAO>(
-        create: (_) => NotificationDAO(),
-      ),
-      Provider<CategoryDAO>(
-        create: (context) => CategoryDAO(),
-      ),
-      Provider<UserService>(
-        create: (context) {
-          final userDAO = Provider.of<UserDAO>(context, listen: false);
-          return UserService(userDAO);
-        },
-      ),
       Provider<CompanyService>(
         create: (context) {
           final companyDAO = Provider.of<CompanyDAO>(context, listen: false);
@@ -121,14 +124,6 @@ void main() async {
           final userDAO = Provider.of<UserDAO>(context, listen: false);
           return CompanyService(companyDAO, roleDAO, userDAO);
         },
-      ),
-      ChangeNotifierProvider(
-        create: (context) => CompanyProvider(
-          Provider.of<CompanyDAO>(context, listen: false),
-        ),
-      ),
-      Provider<DashboardDataService>(
-        create: (context) => DashboardDataService(),
       ),
       Provider<NotificationService>(
         create: (context) {
@@ -142,14 +137,6 @@ void main() async {
 
           return notificationService;
         },
-      ),
-      Provider<PermissionService>(
-        create: (context) => PermissionService(
-          Provider.of<RoleDAO>(context, listen: false),
-          Provider.of<CompanyDAO>(context, listen: false),
-          Provider.of<AuthViewModel>(context, listen: false),
-          Provider.of<CompanyProvider>(context, listen: false),
-        ),
       ),
       Provider<NavigationManager>(
         create: (context) => NavigationManager(
@@ -178,9 +165,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final email =
-    //     Provider.of<EmailPasswordAuthViewModel>(context, listen: false);
-    // email.signIn();
     return MaterialApp(
       title: 'Inventory System',
       theme: buildTheme(),
@@ -198,9 +182,8 @@ class MyApp extends StatelessWidget {
 
         return RouteGuard.generateRoute(
           settings,
-          builder,
           protected: routeConfig.isProtected,
-          appPage: routeConfig.appPage,
+          routeConfig: routeConfig,
           permissionService:
               Provider.of<PermissionService>(context, listen: false),
         );
@@ -210,13 +193,9 @@ class MyApp extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.active) {
             User? user = snapshot.data;
-
-            if (user != null) {
-              // User is signed in. Create/update user document in Firestore.
-              final userService =
-                  Provider.of<UserService>(context, listen: false);
-              userService.createUser(user);
-            }
+            final authViewModel =
+                Provider.of<AuthViewModel>(context, listen: false);
+            authViewModel.signInUser(context);
 
             if (user == null) {
               return Scaffold(

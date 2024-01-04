@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:inventory_system/features/delivery/models/delivery_model.dart';
+import 'package:inventory_system/enums/delivery_status.dart';
 
 class DeliveryStatusSelect extends StatefulWidget {
   final DeliveryStatus initialStatus;
@@ -40,7 +40,7 @@ class _DeliveryStatusSelectState extends State<DeliveryStatusSelect> {
       items: DeliveryStatus.values.map((status) {
         return DropdownMenuItem(
           value: status,
-          child: Text(describeEnum(status)),
+          child: Text(status.name),
         );
       }).toList(),
       decoration: const InputDecoration(

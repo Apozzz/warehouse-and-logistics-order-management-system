@@ -1,17 +1,12 @@
 import 'package:flutter/foundation.dart';
-
-enum DeliveryStatus {
-  Preparing,
-  InTransit,
-  Delivered,
-  Cancelled,
-}
+import 'package:inventory_system/enums/delivery_status.dart';
 
 class Delivery {
   final String id;
   final DateTime deliveryDate;
   final List<String> orderIds;
   final String vehicleId;
+  final String userId;
   final DeliveryStatus status;
   final String companyId;
 
@@ -20,6 +15,7 @@ class Delivery {
     required this.deliveryDate,
     required this.orderIds,
     required this.vehicleId,
+    required this.userId,
     required this.status,
     required this.companyId,
   });
@@ -31,6 +27,7 @@ class Delivery {
       deliveryDate: DateTime.parse(data['deliveryDate']),
       orderIds: List<String>.from(data['orderIds']),
       vehicleId: data['vehicleId'],
+      userId: data['userId'] as String,
       status: DeliveryStatus.values[data['status']],
       companyId: data['companyId'],
     );
@@ -42,6 +39,7 @@ class Delivery {
       'deliveryDate': deliveryDate.toIso8601String(),
       'orderIds': orderIds,
       'vehicleId': vehicleId,
+      'userId': userId,
       'status': status.index,
       'companyId': companyId,
     };
@@ -53,6 +51,7 @@ class Delivery {
     DateTime? deliveryDate,
     List<String>? orderIds,
     String? vehicleId,
+    String? userId,
     DeliveryStatus? status,
     String? companyId,
   }) {
@@ -61,13 +60,15 @@ class Delivery {
       deliveryDate: deliveryDate ?? this.deliveryDate,
       orderIds: orderIds ?? this.orderIds,
       vehicleId: vehicleId ?? this.vehicleId,
+      userId: userId ?? this.userId,
       status: status ?? this.status,
       companyId: companyId ?? this.companyId,
     );
   }
 
   // Check if Delivery is empty
-  bool get isEmpty => id.isEmpty && orderIds.isEmpty && vehicleId.isEmpty;
+  bool get isEmpty =>
+      id.isEmpty && orderIds.isEmpty && vehicleId.isEmpty && userId.isEmpty;
 
   // Check if Delivery is not empty
   bool get isNotEmpty => !isEmpty;
@@ -75,7 +76,7 @@ class Delivery {
   // Overriding toString for better readability during debugging
   @override
   String toString() {
-    return 'Delivery{id: $id, deliveryDate: $deliveryDate, orderIds: $orderIds, vehicleId: $vehicleId, status: $status}';
+    return 'Delivery{id: $id, deliveryDate: $deliveryDate, orderIds: $orderIds, vehicleId: $vehicleId, userId: $userId, status: $status}';
   }
 
   // Overriding equality and hashCode
@@ -88,6 +89,7 @@ class Delivery {
         other.deliveryDate == deliveryDate &&
         listEquals(other.orderIds, orderIds) &&
         other.vehicleId == vehicleId &&
+        other.userId == userId &&
         other.status == status;
   }
 
@@ -97,6 +99,7 @@ class Delivery {
         deliveryDate.hashCode ^
         orderIds.hashCode ^
         vehicleId.hashCode ^
+        userId.hashCode ^
         status.hashCode;
   }
 
@@ -107,7 +110,8 @@ class Delivery {
       deliveryDate: DateTime.now(),
       orderIds: [],
       vehicleId: '',
-      status: DeliveryStatus.Preparing,
+      userId: '',
+      status: DeliveryStatus.NotStarted,
       companyId: '',
     );
   }

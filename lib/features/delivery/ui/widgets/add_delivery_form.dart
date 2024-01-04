@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/constants/route_paths.dart';
 import 'package:inventory_system/features/delivery/DAOs/delivery_dao.dart';
 import 'package:inventory_system/features/delivery/ui/widgets/delivery_form.dart';
 import 'package:inventory_system/features/order/DAOs/order_dao.dart';
 import 'package:inventory_system/features/order/models/order_model.dart';
 import 'package:inventory_system/features/vehicle/DAOs/vehicle_dao.dart';
 import 'package:inventory_system/features/vehicle/models/vehicle_model.dart';
+import 'package:inventory_system/shared/extensions/navigator_extension.dart';
 import 'package:inventory_system/shared/hoc/with_company_id.dart';
 import 'package:provider/provider.dart';
 
@@ -51,7 +53,7 @@ class _AddDeliveryFormState extends State<AddDeliveryForm> {
 
   @override
   Widget build(BuildContext context) {
-    final deliveryDAO = Provider.of<DeliveryDAO>(context, listen: false);
+    final navigator = Navigator.of(context);
 
     if (isLoading) {
       return const CircularProgressIndicator();
@@ -66,8 +68,7 @@ class _AddDeliveryFormState extends State<AddDeliveryForm> {
       allOrders: orders!,
       allVehicles: vehicles!,
       onSubmit: (delivery) async {
-        await deliveryDAO.createDelivery(delivery);
-        // Navigate to the delivery list page or show a success message
+        navigator.pushReplacementNamedNoTransition(RoutePaths.deliveries);
       },
     );
   }

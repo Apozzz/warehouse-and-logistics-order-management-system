@@ -1,6 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:inventory_system/enums/app_page.dart';
-import 'package:inventory_system/enums/permission_type.dart';
 import 'package:inventory_system/features/company/models/company_model.dart';
 import 'package:inventory_system/features/user/models/user_model.dart';
 
@@ -77,5 +75,16 @@ class UserDAO {
     await _db.collection('companies').doc(companyId).update({
       'userIds': FieldValue.arrayRemove([userId]),
     });
+  }
+
+  Future<List<User>> getUsersByCompanyId(String companyId) async {
+    final QuerySnapshot userSnapshot = await _db
+        .collection('users')
+        .where('companyIds', arrayContains: companyId)
+        .get();
+
+    return userSnapshot.docs
+        .map((doc) => User.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+        .toList();
   }
 }

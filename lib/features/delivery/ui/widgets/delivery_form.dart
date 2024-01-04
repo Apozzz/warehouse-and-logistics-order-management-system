@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:inventory_system/enums/delivery_status.dart';
 import 'package:inventory_system/features/delivery/models/delivery_model.dart';
 import 'package:inventory_system/features/delivery/ui/widgets/delivery_status_selector.dart';
+import 'package:inventory_system/features/packages/services/packaging_service.dart';
+import 'package:inventory_system/features/user/DAOs/user_dao.dart';
+import 'package:inventory_system/features/user/models/user_model.dart';
+import 'package:inventory_system/features/user/ui/widgets/driver_select.dart';
 import 'package:inventory_system/features/vehicle/ui/widgets/vehicle_selector.dart';
 import 'package:inventory_system/features/order/models/order_model.dart';
 import 'package:inventory_system/features/vehicle/models/vehicle_model.dart';
 import 'package:inventory_system/features/order/ui/widgets/order_multi_select.dart';
+import 'package:provider/provider.dart';
 
 class DeliveryForm extends StatefulWidget {
   final Delivery? delivery; // Null if adding a new delivery
@@ -32,7 +38,8 @@ class _DeliveryFormState extends State<DeliveryForm> {
   DateTime _deliveryDate = DateTime.now();
   List<Order> _selectedOrders = [];
   Vehicle? _selectedVehicle;
-  DeliveryStatus _status = DeliveryStatus.Preparing;
+  String? _selectedDriverId;
+  DeliveryStatus _status = DeliveryStatus.NotStarted;
 
   @override
   void initState() {
@@ -42,6 +49,7 @@ class _DeliveryFormState extends State<DeliveryForm> {
     if (widget.delivery != null) {
       // Initialize form fields with existing delivery data
       _deliveryDate = widget.delivery!.deliveryDate;
+      _selectedDriverId = widget.delivery!.userId;
       _selectedOrders =
           mapOrderIdsToOrders(delivery.orderIds, widget.allOrders);
       _selectedVehicle = delivery.vehicleId.isNotEmpty
@@ -108,6 +116,15 @@ class _DeliveryFormState extends State<DeliveryForm> {
                 });
               },
             ),
+            DriverSelect(
+              companyId: widget.companyId,
+              initialDriverId: _selectedDriverId,
+              onSelected: (User? driver) {
+                setState(() {
+                  _selectedDriverId = driver?.id;
+                });
+              },
+            ),
             DeliveryStatusSelect(
               initialStatus: _status,
               onStatusChanged: (newStatus) {
@@ -117,19 +134,24 @@ class _DeliveryFormState extends State<DeliveryForm> {
               },
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (_formKey.currentState!.validate()) {
+                  final packagingService =
+                      Provider.of<PackagingService>(context, listen: false);
                   final delivery = Delivery(
                     id: widget.delivery?.id ??
                         '', // Keep existing ID if editing
                     deliveryDate: _deliveryDate,
                     orderIds: _selectedOrders.map((order) => order.id).toList(),
                     vehicleId: _selectedVehicle?.id ?? '',
+                    userId: _selectedDriverId ?? '',
                     status: _status,
                     companyId: widget.companyId,
                   );
+
+                  packagingService.updatePackagesForDelivery(
+                      delivery, _selectedOrders, _selectedDriverId ?? '');
                   widget.onSubmit(delivery);
-                  Navigator.pop(context);
                 }
               },
               child: const Text('Submit'),

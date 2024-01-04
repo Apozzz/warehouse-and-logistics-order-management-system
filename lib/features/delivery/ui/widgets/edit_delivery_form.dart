@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:inventory_system/constants/route_paths.dart';
 import 'package:inventory_system/features/delivery/DAOs/delivery_dao.dart';
 import 'package:inventory_system/features/delivery/models/delivery_model.dart';
-import 'package:inventory_system/features/delivery/ui/pages/delivery_page.dart';
 import 'package:inventory_system/features/delivery/ui/widgets/delivery_form.dart';
 import 'package:inventory_system/features/order/DAOs/order_dao.dart';
 import 'package:inventory_system/features/order/models/order_model.dart';
@@ -51,7 +50,6 @@ class _EditDeliveryScreenState extends State<EditDeliveryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final deliveryDAO = Provider.of<DeliveryDAO>(context, listen: false);
     final navigator = Navigator.of(context);
 
     if (isLoading) {
@@ -69,8 +67,6 @@ class _EditDeliveryScreenState extends State<EditDeliveryScreen> {
         allOrders: allOrders!,
         allVehicles: allVehicles!,
         onSubmit: (updatedDelivery) async {
-          await deliveryDAO.updateDelivery(
-              updatedDelivery.id, updatedDelivery.toMap());
           navigator.pushReplacementNamedNoTransition(RoutePaths.deliveries);
         },
       ),

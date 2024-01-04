@@ -48,6 +48,7 @@ class _OrderFormState extends State<OrderForm> {
           productId: orderItem.productId,
           quantity: orderItem.quantity,
           price: product.price,
+          scanCode: product.scanCode,
         );
       }).toList();
 
@@ -84,6 +85,7 @@ class _OrderFormState extends State<OrderForm> {
                 productId: product.id,
                 quantity: 1,
                 price: product.price,
+                scanCode: product.scanCode,
               ); // New product selected
       }).toList();
     });

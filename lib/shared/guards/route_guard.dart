@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:inventory_system/enums/permission_type.dart';
 import 'package:inventory_system/features/authentication/ui/pages/auth_selection_page.dart';
 import 'package:inventory_system/features/authentication/viewmodels/auth_view_model.dart';
 import 'package:inventory_system/enums/app_page.dart';
+import 'package:inventory_system/shared/guards/route_config.dart';
+import 'package:inventory_system/shared/models/view_permissions.dart';
 import 'package:inventory_system/shared/services/permission_service.dart';
 import 'package:inventory_system/shared/ui/pages/no_access_page.dart';
 import 'package:provider/provider.dart';
 
 class RouteGuard {
-  static Route<dynamic> generateRoute(
-      RouteSettings settings, WidgetBuilder builder,
+  static Route<dynamic> generateRoute(RouteSettings settings,
       {required bool protected,
-      AppPage? appPage,
+      required RouteConfig routeConfig,
       required PermissionService permissionService}) {
-    if (protected && appPage != null) {
+    WidgetBuilder builder = _getBuilder(routeConfig, settings);
+
+    if (protected && routeConfig.appPage != null) {
       return MaterialPageRoute(
         builder: (context) {
           final authViewModel =
@@ -24,19 +26,20 @@ class RouteGuard {
           }
 
           // Directly use PermissionService without companyId and userId
-          return FutureBuilder<bool>(
+          return FutureBuilder<ViewPermissions>(
             future:
-                permissionService.hasPermission(appPage, PermissionType.View),
-            builder: (context, permissionSnapshot) {
-              if (permissionSnapshot.connectionState ==
-                  ConnectionState.waiting) {
+                permissionService.fetchViewPermissions(routeConfig.appPage!),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
                 return const CircularProgressIndicator();
-              } else if (permissionSnapshot.hasData &&
-                  permissionSnapshot.data == true) {
-                return builder(context);
-              } else {
-                return const NoAccessPage(); // Redirect to No Access Page if permission is denied
               }
+
+              if (!snapshot.hasData ||
+                  (!snapshot.data!.viewSelf && !snapshot.data!.viewAll)) {
+                return const NoAccessPage(); // No access if no view permission
+              }
+
+              return builder(context);
             },
           );
         },
@@ -45,5 +48,19 @@ class RouteGuard {
       return MaterialPageRoute(
           builder: builder); // Unprotected routes proceed as usual
     }
+  }
+
+  static WidgetBuilder _getBuilder(
+      RouteConfig routeConfig, RouteSettings settings) {
+    // This function selects the appropriate builder based on the routeConfig
+    return (BuildContext context) {
+      if (routeConfig.builderWithArgs != null) {
+        return routeConfig.builderWithArgs!(context, settings.arguments);
+      } else if (routeConfig.builder != null) {
+        return routeConfig.builder!(context);
+      } else {
+        throw Exception('No builder defined for route ${routeConfig.path}');
+      }
+    };
   }
 }

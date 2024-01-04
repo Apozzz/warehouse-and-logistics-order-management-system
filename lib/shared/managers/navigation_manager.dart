@@ -38,8 +38,9 @@ class NavigationManager {
 
     // Check permissions only for items associated with an AppPage
     if (appPage != null) {
-      hasPermission =
-          await _permissionService.hasPermission(appPage, PermissionType.View);
+      final permissions =
+          await _permissionService.fetchViewPermissions(appPage);
+      hasPermission = permissions.viewAll || permissions.viewSelf;
     }
 
     if (hasPermission) {
@@ -61,14 +62,14 @@ class NavigationManager {
   // New function to create a GButton for the navbar
   Future<GButton> createNavbarItem(
       BuildContext context, String title, IconData icon, String route,
-      {AppPage? appPage, required int index}) async {
+      {AppPage? appPage, required int index, Object? arguments}) async {
     bool hasPermission =
         true; // Default to true for pages that don't require specific permissions
-
     // Check permissions only for items associated with an AppPage
     if (appPage != null) {
-      hasPermission =
-          await _permissionService.hasPermission(appPage, PermissionType.View);
+      final permissions =
+          await _permissionService.fetchViewPermissions(appPage);
+      hasPermission = permissions.viewAll || permissions.viewSelf;
     }
 
     if (hasPermission) {
@@ -77,7 +78,7 @@ class NavigationManager {
         text: title,
         onPressed: () {
           setCurrentIndex(index, isDrawerItem: false);
-          navigate(context, route);
+          navigate(context, route, arguments: arguments);
         },
       );
     } else {
@@ -92,11 +93,12 @@ class NavigationManager {
   }
 
   // Handle the navigation logic here to avoid repetition
-  void navigate(BuildContext context, String route) {
+  void navigate(BuildContext context, String route, {Object? arguments}) {
     if (Navigator.canPop(context)) {
       Navigator.of(context).pop(); // Close the drawer if it's open
     }
-    Navigator.of(context).pushReplacementNamedNoTransition(route);
+    Navigator.of(context)
+        .pushReplacementNamedNoTransition(route, arguments: arguments);
     if (_isDrawerItemActive) {
       resetNavbarSelection();
     }
