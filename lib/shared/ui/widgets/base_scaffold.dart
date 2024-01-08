@@ -49,6 +49,7 @@ class BaseScaffold extends StatelessWidget {
           },
         ),
       ],
+      bottom: customAppBar?.bottom,
     );
   }
 

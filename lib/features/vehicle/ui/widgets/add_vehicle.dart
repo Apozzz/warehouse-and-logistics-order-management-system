@@ -3,7 +3,6 @@ import 'package:inventory_system/constants/route_paths.dart';
 import 'package:inventory_system/features/category/DAOs/category_dao.dart';
 import 'package:inventory_system/features/category/models/category_model.dart';
 import 'package:inventory_system/features/vehicle/DAOs/vehicle_dao.dart';
-import 'package:inventory_system/features/vehicle/ui/pages/vehicle_page.dart';
 import 'package:inventory_system/features/vehicle/ui/widgets/vehicle_form.dart';
 import 'package:inventory_system/features/order/DAOs/order_dao.dart';
 import 'package:inventory_system/features/order/models/order_model.dart';

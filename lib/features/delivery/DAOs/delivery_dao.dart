@@ -91,4 +91,17 @@ class DeliveryDAO {
             Delivery.fromMap(doc.data() as Map<String, dynamic>, doc.id))
         .toList();
   }
+
+  Future<List<Delivery>> fetchTransportingDeliveries(String companyId) async {
+    final QuerySnapshot snapshot = await _db
+        .collection('deliveries')
+        .where('companyId', isEqualTo: companyId)
+        .where('status', isEqualTo: DeliveryStatus.InTransit.index)
+        .get();
+
+    return snapshot.docs
+        .map((doc) =>
+            Delivery.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+        .toList();
+  }
 }

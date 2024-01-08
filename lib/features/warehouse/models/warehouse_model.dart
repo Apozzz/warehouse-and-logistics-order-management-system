@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:inventory_system/utils/date_utils.dart';
 
 class Warehouse {
@@ -7,6 +8,7 @@ class Warehouse {
   final String address;
   final DateTime createdAt;
   final String companyId;
+  final Set<String> sectorIds;
 
   Warehouse({
     required this.id,
@@ -14,6 +16,7 @@ class Warehouse {
     required this.address,
     required this.createdAt,
     required this.companyId,
+    required this.sectorIds,
   });
 
   // Factory constructor to create a Warehouse instance from a Map
@@ -22,12 +25,16 @@ class Warehouse {
         ? (data['createdAt'] as Timestamp).toDate()
         : DateTime.now();
 
+    var sectorsData = data['sectorIds'] as List<dynamic>? ?? [];
+    Set<String> sectors = Set.from(sectorsData);
+
     return Warehouse(
       id: id,
       name: data['name'] ?? '',
       address: data['address'] ?? '',
       createdAt: createdAt,
       companyId: data['companyId'] ?? '',
+      sectorIds: sectors,
     );
   }
 
@@ -38,6 +45,7 @@ class Warehouse {
       'address': address,
       'createdAt': CustomDateUtils.formatDate(createdAt),
       'companyId': companyId,
+      'sectorIds': sectorIds.toList(),
     };
   }
 
@@ -48,6 +56,7 @@ class Warehouse {
       createdAt: DateTime.now(),
       companyId: '',
       address: '',
+      sectorIds: {},
     );
   }
 
@@ -59,9 +68,10 @@ class Warehouse {
         other.id == id &&
         other.name == name &&
         other.address == address &&
-        other.companyId == companyId;
+        other.companyId == companyId &&
+        setEquals(other.sectorIds, sectorIds);
   }
 
   @override
-  int get hashCode => Object.hash(id, name, address, companyId);
+  int get hashCode => Object.hash(id, name, address, companyId, sectorIds);
 }

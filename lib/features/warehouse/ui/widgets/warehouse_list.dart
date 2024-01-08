@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:inventory_system/features/warehouse/models/warehouse_model.dart';
 import 'package:inventory_system/features/warehouse/DAOs/warehouse_dao.dart';
-import 'package:inventory_system/features/warehouse/ui/widgets/warehouse_tile.dart';
+import 'package:inventory_system/features/warehouse/models/warehouse_model.dart';
+import 'package:inventory_system/features/warehouse/ui/widgets/warehouse_actions.dart';
 import 'package:inventory_system/shared/hoc/with_company_id.dart';
 import 'package:provider/provider.dart';
 
@@ -9,7 +9,7 @@ class WarehouseList extends StatefulWidget {
   const WarehouseList({Key? key}) : super(key: key);
 
   @override
-  State<WarehouseList> createState() => _WarehouseListState();
+  _WarehouseListState createState() => _WarehouseListState();
 }
 
 class _WarehouseListState extends State<WarehouseList> {
@@ -21,12 +21,11 @@ class _WarehouseListState extends State<WarehouseList> {
     fetchWarehousesWithCompanyId();
   }
 
-  void fetchWarehousesWithCompanyId() {
-    withCompanyId(context, (companyId) async {
+  Future<void> fetchWarehousesWithCompanyId() async {
+    await withCompanyId(context, (companyId) async {
       final warehouseDAO = Provider.of<WarehouseDAO>(context, listen: false);
       warehousesFuture = warehouseDAO.fetchWarehouses(companyId);
-      // The following line is important as it triggers a rebuild after the future is set
-      if (mounted) setState(() {});
+      setState(() {});
     });
   }
 
@@ -39,20 +38,28 @@ class _WarehouseListState extends State<WarehouseList> {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (snapshot.hasData) {
-          List<Warehouse> warehouses = snapshot.data!;
-          return ListView.separated(
-            itemCount: warehouses.length,
-            itemBuilder: (context, index) {
-              final warehouse = warehouses[index];
-              return WarehouseTile(warehouse: warehouse);
-            },
-            separatorBuilder: (context, index) => const Divider(),
-          );
-        } else {
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const Center(child: Text('No warehouses found.'));
         }
+
+        List<Warehouse> warehouses = snapshot.data!;
+        return ListView.separated(
+          itemCount: warehouses.length,
+          separatorBuilder: (context, index) => const Divider(),
+          itemBuilder: (context, index) {
+            final warehouse = warehouses[index];
+            return ListTile(
+              title: Text('Warehouse: ${warehouse.name}'),
+              subtitle: Text('Address: ${warehouse.address}'),
+              trailing: WarehouseActions(
+                  warehouse:
+                      warehouse), // This widget will handle actions for each warehouse
+            );
+          },
+        );
       },
     );
   }
+
+  // Additional methods as needed...
 }

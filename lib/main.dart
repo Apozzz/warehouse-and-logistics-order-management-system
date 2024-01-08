@@ -28,6 +28,7 @@ import 'package:inventory_system/features/packages/DAOs/package_progress_dao.dar
 import 'package:inventory_system/features/packages/services/packaging_service.dart';
 import 'package:inventory_system/features/product/DAOs/product_dao.dart';
 import 'package:inventory_system/features/role/DAOs/role_dao.dart';
+import 'package:inventory_system/features/sector/DAOs/sector_dao.dart';
 import 'package:inventory_system/features/user/DAOs/user_dao.dart';
 import 'package:inventory_system/features/user/services/user_service.dart';
 import 'package:inventory_system/features/vehicle/DAOs/vehicle_dao.dart';
@@ -59,6 +60,7 @@ void main() async {
       Provider<CategoryDAO>(create: (_) => CategoryDAO()),
       Provider<WarehouseDAO>(create: (_) => WarehouseDAO()),
       Provider<ProductDAO>(create: (_) => ProductDAO()),
+      Provider<SectorDAO>(create: (_) => SectorDAO()),
       Provider<OrderDAO>(
         create: (context) {
           final productDAO = Provider.of<ProductDAO>(context, listen: false);

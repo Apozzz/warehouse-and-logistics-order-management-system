@@ -79,6 +79,17 @@ class PackagingService {
         : deliveries;
   }
 
+  Future<List<Delivery>> fetchTransportingDeliveries(String companyId,
+      {String? userId}) async {
+    List<Delivery> deliveries =
+        await deliveryDAO.fetchTransportingDeliveries(companyId);
+
+    // Filter deliveries by userId if provided
+    return userId?.isNotEmpty ?? false
+        ? deliveries.where((delivery) => delivery.userId == userId).toList()
+        : deliveries;
+  }
+
   Future<void> scanAndProcessPackage(String deliveryId, String barcode) async {
     final packageProgressList =
         await packageProgressDAO.getPackageProgressByDeliveryId(deliveryId);
