@@ -1,17 +1,17 @@
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
-import 'package:inventory_system/features/warehouse/DAOs/warehouse_dao.dart';
 import 'package:inventory_system/features/warehouse/models/warehouse_model.dart';
-import 'package:inventory_system/shared/hoc/with_company_id.dart';
-import 'package:provider/provider.dart';
 
 class WarehouseSelect extends StatefulWidget {
   final Warehouse? initialWarehouse;
-  final Function(Warehouse?) onSelected;
+  final Function(Warehouse?) onWarehouseSelected;
+  final List<Warehouse> allWarehouses;
 
   const WarehouseSelect({
     Key? key,
     this.initialWarehouse,
-    required this.onSelected,
+    required this.onWarehouseSelected,
+    required this.allWarehouses,
   }) : super(key: key);
 
   @override
@@ -29,47 +29,22 @@ class _WarehouseSelectState extends State<WarehouseSelect> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Warehouse>?>(
-      future: withCompanyId(
-        context,
-        (companyId) => Provider.of<WarehouseDAO>(context, listen: false)
-            .fetchWarehouses(companyId),
+    return DropdownSearch<Warehouse>(
+      popupProps: const PopupProps.menu(
+        showSearchBox: true,
       ),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
-        } else if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Text('No warehouses available.');
-        } else {
-          List<Warehouse> warehouses = snapshot.data!;
-
-          if (selectedWarehouse != null &&
-              !warehouses.contains(selectedWarehouse)) {
-            selectedWarehouse = null;
-          }
-
-          return DropdownButtonFormField<Warehouse>(
-            value: selectedWarehouse,
-            items: warehouses.map((Warehouse warehouse) {
-              return DropdownMenuItem<Warehouse>(
-                value: warehouse,
-                child: Text(warehouse.name),
-              );
-            }).toList(),
-            onChanged: (Warehouse? newValue) {
-              widget.onSelected(newValue);
-            },
-            decoration: const InputDecoration(
-              labelText: 'Select Warehouse',
-              border: OutlineInputBorder(),
-            ),
-            validator: (value) =>
-                value == null ? 'Please select a warehouse' : null,
-          );
-        }
+      items: widget.allWarehouses,
+      itemAsString: (Warehouse warehouse) => warehouse.name,
+      onChanged: (Warehouse? newValue) {
+        widget.onWarehouseSelected(newValue);
       },
+      selectedItem: selectedWarehouse,
+      dropdownDecoratorProps: const DropDownDecoratorProps(
+        dropdownSearchDecoration: InputDecoration(
+          labelText: "Select Warehouse",
+          hintText: "Search and select warehouse",
+        ),
+      ),
     );
   }
 }

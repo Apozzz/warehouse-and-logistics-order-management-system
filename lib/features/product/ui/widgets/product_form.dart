@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:inventory_system/features/category/models/category_model.dart';
 import 'package:inventory_system/features/category/ui/widgets/category_multi_select.dart';
 import 'package:inventory_system/features/product/models/product_model.dart';
+import 'package:inventory_system/features/sector/models/sector_model.dart';
+import 'package:inventory_system/features/sector/ui/widgets/sector_select.dart';
 import 'package:inventory_system/features/warehouse/ui/widgets/warehouse_selector.dart';
 import 'package:inventory_system/features/warehouse/models/warehouse_model.dart';
 import 'package:inventory_system/utils/barcode_scanner.dart';
@@ -11,6 +13,7 @@ class ProductForm extends StatefulWidget {
   final String companyId;
   final List<Warehouse> warehouses;
   final List<Category> categories; // Add this line
+  final List<Sector> sectors;
   final Function(Product) onSubmit;
 
   const ProductForm({
@@ -18,6 +21,7 @@ class ProductForm extends StatefulWidget {
     required this.warehouses,
     required this.categories, // Add this line
     required this.companyId,
+    required this.sectors,
     this.product,
     Key? key,
   }) : super(key: key);
@@ -34,6 +38,7 @@ class _ProductFormState extends State<ProductForm> {
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
   Warehouse? _selectedWarehouse;
+  Sector? _selectedSector;
   List<Category> _selectedCategories = []; // Add this line
 
   @override
@@ -47,13 +52,14 @@ class _ProductFormState extends State<ProductForm> {
       _barcodeController.text = product.scanCode;
       _priceController.text = product.price.toString();
       _quantityController.text = product.quantity.toString();
-      _selectedWarehouse =
-          (product.warehouseId != null && product.warehouseId!.isNotEmpty)
-              ? widget.warehouses.firstWhere((v) => v.id == product.warehouseId,
-                  orElse: () => Warehouse.empty())
-              : (widget.warehouses.isNotEmpty
-                  ? widget.warehouses.first
-                  : Warehouse.empty());
+      _selectedWarehouse = widget.warehouses.firstWhere(
+        (w) => w.id == widget.product!.warehouseId,
+        orElse: () => Warehouse.empty(),
+      );
+      _selectedSector = widget.sectors.firstWhere(
+        (s) => s.id == widget.product!.sectorId,
+        orElse: () => Sector.empty(),
+      );
       _selectedCategories = widget.categories
           .where((category) => widget.product!.categories.contains(category.id))
           .toList();
@@ -159,8 +165,21 @@ class _ProductFormState extends State<ProductForm> {
             const SizedBox(height: 10),
             WarehouseSelect(
               initialWarehouse: _selectedWarehouse,
-              onSelected: (Warehouse? warehouse) {
+              allWarehouses: widget.warehouses,
+              onWarehouseSelected: (Warehouse? warehouse) {
                 _selectedWarehouse = warehouse;
+                _selectedSector = null;
+              },
+            ),
+            const SizedBox(height: 20),
+            SectorSelect(
+              selectedWarehouse: _selectedWarehouse,
+              allSectors: widget.sectors,
+              initialSector: _selectedSector,
+              onSectorSelected: (Sector? sector) {
+                setState(() {
+                  _selectedSector = sector;
+                });
               },
             ),
             const SizedBox(height: 20),
@@ -192,6 +211,7 @@ class _ProductFormState extends State<ProductForm> {
                     companyId: widget
                         .companyId, // Use existing companyId or empty string if it's a new product
                     categories: _selectedCategories.map((c) => c.id).toSet(),
+                    sectorId: _selectedSector?.id,
                   );
 
                   widget.onSubmit(

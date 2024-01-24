@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/constants/route_paths.dart';
 import 'package:inventory_system/enums/app_page.dart';
 import 'package:inventory_system/enums/permission_type.dart';
 import 'package:inventory_system/features/sector/DAOs/sector_dao.dart';
 import 'package:inventory_system/features/sector/models/sector_model.dart';
 import 'package:inventory_system/features/sector/ui/widgets/edit_sector.dart';
+import 'package:inventory_system/shared/extensions/navigator_extension.dart';
 import 'package:inventory_system/shared/hoc/with_company_id.dart';
 import 'package:inventory_system/shared/ui/widgets/permission_controlled_action_button.dart';
 import 'package:provider/provider.dart';
@@ -69,7 +71,9 @@ class SectorActions extends StatelessWidget {
               child: const Text('Delete'),
               onPressed: () async {
                 await _deleteSector(context);
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pushReplacementNamedNoTransition(
+                    RoutePaths.warehouses,
+                    arguments: 1); // Close the dialog
               },
             ),
           ],

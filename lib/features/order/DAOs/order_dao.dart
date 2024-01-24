@@ -95,4 +95,25 @@ class OrderDAO {
       return null;
     }
   }
+
+  Future<List<order.Order>> fetchOrdersByIds(List<String> orderIds) async {
+    try {
+      if (orderIds.isEmpty) {
+        return [];
+      }
+
+      final orderDocs = await _firestore
+          .collection('orders')
+          .where(FieldPath.documentId, whereIn: orderIds)
+          .get();
+
+      return orderDocs.docs
+          .map((doc) => order.Order.fromMap(doc.data(), doc.id))
+          .toList();
+    } catch (e) {
+      // Handle exceptions
+      print("Error fetching orders: $e");
+      return [];
+    }
+  }
 }

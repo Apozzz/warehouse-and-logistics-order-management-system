@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:inventory_system/enums/order_status.dart';
 import 'package:inventory_system/features/order/models/oraderitem_model.dart';
-import 'package:inventory_system/features/product/DAOs/product_dao.dart';
 
 class Order {
   final String id;
@@ -11,6 +11,9 @@ class Order {
   final String customerAddress;
   final double total;
   final Set<String> categories; // New field to store unique categories
+  final OrderStatus status;
+  final String? declineReason;
+  final String? imageUrl;
 
   Order({
     required this.id,
@@ -21,6 +24,9 @@ class Order {
     required this.customerAddress,
     required this.total,
     required this.categories,
+    this.status = OrderStatus.Pending,
+    this.declineReason,
+    this.imageUrl,
   });
 
   factory Order.empty() {
@@ -33,6 +39,7 @@ class Order {
       customerAddress: '',
       total: 0,
       categories: {}, // Empty set for categories
+      status: OrderStatus.Pending,
     );
   }
 
@@ -57,6 +64,9 @@ class Order {
       customerAddress: data['customerAddress'] ?? '',
       total: data['total'] ?? 0,
       categories: Set<String>.from(data['categories'] ?? []),
+      status: OrderStatus.values[data['status'] ?? 0],
+      declineReason: data['declineReason'],
+      imageUrl: data['imageUrl'],
     );
   }
 
@@ -69,6 +79,37 @@ class Order {
       'customerAddress': customerAddress,
       'total': total,
       'categories': categories.toList(), // Store the categories as a list
+      'status': status.index,
+      'declineReason': declineReason,
+      'imageUrl': imageUrl,
     };
+  }
+
+  Order copyWith({
+    String? id,
+    String? companyId,
+    DateTime? createdAt,
+    List<OrderItem>? items,
+    String? customerName,
+    String? customerAddress,
+    double? total,
+    Set<String>? categories,
+    OrderStatus? status,
+    String? declineReason,
+    String? imageUrl,
+  }) {
+    return Order(
+      id: id ?? this.id,
+      companyId: companyId ?? this.companyId,
+      createdAt: createdAt ?? this.createdAt,
+      items: items ?? this.items,
+      customerName: customerName ?? this.customerName,
+      customerAddress: customerAddress ?? this.customerAddress,
+      total: total ?? this.total,
+      categories: categories ?? this.categories,
+      status: status ?? this.status,
+      declineReason: declineReason ?? this.declineReason,
+      imageUrl: imageUrl ?? this.imageUrl,
+    );
   }
 }

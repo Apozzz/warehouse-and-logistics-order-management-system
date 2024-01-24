@@ -3,7 +3,6 @@ import 'package:inventory_system/enums/app_page.dart';
 import 'package:inventory_system/enums/permission_type.dart';
 import 'package:inventory_system/features/sector/ui/widgets/add_sector.dart';
 import 'package:inventory_system/features/sector/ui/widgets/sector_list.dart';
-import 'package:inventory_system/shared/ui/widgets/base_scaffold.dart';
 import 'package:inventory_system/shared/ui/widgets/permission_controlled_action_button.dart';
 
 class SectorPage extends StatelessWidget {
@@ -11,18 +10,23 @@ class SectorPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BaseScaffold(
-      appBar: AppBar(
-        title: const Text('Sectors'),
-      ),
-      body: const SectorList(), // Sector list widget
-      floatingActionButton: PermissionControlledActionButton(
-        appPage: AppPage.Warehouses, // Specify the AppPage for sectors
-        permissionType: PermissionType.Manage,
-        child: FloatingActionButton(
-          onPressed: () => _showAddSectorForm(context),
-          child: const Icon(Icons.add),
-        ),
+    return Material(
+      child: Stack(
+        children: [
+          const SectorList(), // Sector list widget
+          Positioned(
+            bottom: 16.0,
+            right: 16.0,
+            child: PermissionControlledActionButton(
+              appPage: AppPage.Warehouses,
+              permissionType: PermissionType.Manage,
+              child: FloatingActionButton(
+                onPressed: () => _showAddSectorForm(context),
+                child: const Icon(Icons.add),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -34,9 +38,7 @@ class SectorPage extends StatelessWidget {
       builder: (BuildContext context) {
         return Padding(
           padding: MediaQuery.of(context).viewInsets,
-          child: const Material(
-            child: AddSectorForm(), // Add sector form widget
-          ),
+          child: const AddSectorForm(), // Add sector form widget
         );
       },
     );

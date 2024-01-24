@@ -19,8 +19,7 @@ class DeliveryDAO {
         .where(FieldPath.documentId, whereIn: deliveryIds)
         .get();
     return deliveryDocs.docs
-        .map((doc) =>
-            Delivery.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+        .map((doc) => Delivery.fromMap(doc.data(), doc.id))
         .toList();
   }
 
@@ -65,18 +64,6 @@ class DeliveryDAO {
     return snapshot.docs.length; // Returns the count of documents
   }
 
-  Future<List<Delivery>> fetchNotStartedDeliveries(String companyId) async {
-    final QuerySnapshot snapshot = await _db
-        .collection('deliveries')
-        .where('companyId', isEqualTo: companyId)
-        .where('status', isEqualTo: DeliveryStatus.NotStarted.index)
-        .get();
-
-    return snapshot.docs.map((doc) {
-      return Delivery.fromMap(doc.data() as Map<String, dynamic>, doc.id);
-    }).toList();
-  }
-
   Future<List<Delivery>> fetchPackagingDeliveries(String companyId) async {
     final QuerySnapshot snapshot = await _db
         .collection('deliveries')
@@ -97,6 +84,19 @@ class DeliveryDAO {
         .collection('deliveries')
         .where('companyId', isEqualTo: companyId)
         .where('status', isEqualTo: DeliveryStatus.InTransit.index)
+        .get();
+
+    return snapshot.docs
+        .map((doc) =>
+            Delivery.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+        .toList();
+  }
+
+  Future<List<Delivery>> fetchFinishedDeliveries(String companyId) async {
+    final QuerySnapshot snapshot = await _db
+        .collection('deliveries')
+        .where('companyId', isEqualTo: companyId)
+        .where('status', isEqualTo: DeliveryStatus.Delivered.index)
         .get();
 
     return snapshot.docs

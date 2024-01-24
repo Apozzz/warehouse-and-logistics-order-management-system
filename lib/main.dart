@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:inventory_system/constants/route_paths.dart';
-import 'package:inventory_system/enums/app_page.dart';
 import 'package:inventory_system/features/authentication/services/email_password_authentication.dart';
 import 'package:inventory_system/features/authentication/services/facebook_authentaction.dart';
 import 'package:inventory_system/features/authentication/services/google_authentication.dart';
@@ -20,6 +23,7 @@ import 'package:inventory_system/features/company/services/company_service.dart'
 import 'package:inventory_system/features/company/ui/pages/company_page.dart';
 import 'package:inventory_system/features/dashboard/services/dashboard_data_service.dart';
 import 'package:inventory_system/features/delivery/DAOs/delivery_dao.dart';
+import 'package:inventory_system/features/google_maps/services/google_maps_service.dart';
 import 'package:inventory_system/features/notification/DAOs/notification_dao.dart';
 import 'package:inventory_system/features/notification/services/notification_service.dart';
 import 'package:inventory_system/features/order/DAOs/order_dao.dart';
@@ -39,15 +43,31 @@ import 'package:inventory_system/shared/guards/route_guard.dart';
 import 'package:inventory_system/shared/managers/navigation_manager.dart';
 import 'package:inventory_system/shared/providers/company_provider.dart';
 import 'package:inventory_system/shared/providers/navigation_provider.dart';
+import 'package:inventory_system/shared/services/camera_service.dart';
+import 'package:inventory_system/shared/services/images_service.dart';
 import 'package:inventory_system/shared/services/permission_service.dart';
 import 'package:inventory_system/theme.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    if (e is FirebaseException && e.code == 'duplicate-app') {
+      // Ignore 'duplicate-app' errors during initialization
+      print('Firebase App already initialized');
+    } else {
+      rethrow;
+    }
+  }
+
+  await dotenv.load();
+  String apiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
+
   runApp(
     MultiProvider(providers: [
       Provider<UserDAO>(create: (_) => UserDAO()),
@@ -67,7 +87,11 @@ void main() async {
           return OrderDAO(productDAO);
         },
       ),
+      Provider<ImagePicker>(create: (_) => ImagePicker()),
       Provider<DashboardDataService>(create: (_) => DashboardDataService()),
+      Provider<ImageService>(create: (_) => ImageService()),
+      Provider<CameraService>(create: (_) => CameraService()),
+      Provider<GoogleMapsService>(create: (_) => GoogleMapsService(apiKey)),
       ChangeNotifierProvider(create: (_) => NavigationProvider()),
       ChangeNotifierProvider(
         create: (context) => CompanyProvider(

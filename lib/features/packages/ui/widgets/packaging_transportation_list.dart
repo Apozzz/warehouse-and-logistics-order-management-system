@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:inventory_system/features/authentication/viewmodels/auth_view_model.dart';
 import 'package:inventory_system/features/delivery/models/delivery_model.dart';
 import 'package:inventory_system/features/packages/services/packaging_service.dart';
+import 'package:inventory_system/features/packages/ui/pages/package_finished_detail_page.dart';
 import 'package:inventory_system/features/packages/ui/pages/package_progress_page.dart';
 import 'package:inventory_system/features/packages/ui/pages/package_transport_detail_page.dart';
 import 'package:inventory_system/shared/providers/company_provider.dart';
@@ -40,6 +41,9 @@ class PackagingTransportationList extends StatelessWidget {
         // Fetch transit deliveries
         return packagingService.fetchTransportingDeliveries(companyId,
             userId: userId);
+      case 2:
+        return packagingService.fetchFinishedDeliveries(companyId,
+            userId: userId);
       default:
         return Future.value([]);
     }
@@ -74,16 +78,27 @@ class PackagingTransportationList extends StatelessWidget {
               title: Text('Delivery ID: ${dataItem.id}'),
               subtitle: Text('Status: ${dataItem.status}'),
               onTap: () {
-                if (tabController.index == 0) {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) =>
-                        PackageProgressPage(deliveryId: dataItem.id),
-                  ));
-                } else if (tabController.index == 1) {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) =>
-                        PackageTransportDetailPage(deliveryId: dataItem.id),
-                  ));
+                switch (tabController.index) {
+                  case 0:
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) =>
+                          PackageProgressPage(deliveryId: dataItem.id),
+                    ));
+                    break;
+                  case 1:
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) =>
+                          PackageTransportDetailPage(deliveryId: dataItem.id),
+                    ));
+                    break;
+                  case 2:
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) =>
+                          PackageFinishedDetailPage(deliveryId: dataItem.id),
+                    ));
+                  default:
+                    // Handle the default case or do nothing
+                    break;
                 }
               },
             );

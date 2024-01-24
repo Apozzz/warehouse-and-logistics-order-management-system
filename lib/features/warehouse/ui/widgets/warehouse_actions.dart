@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/constants/route_paths.dart';
 import 'package:inventory_system/enums/app_page.dart';
 import 'package:inventory_system/enums/permission_type.dart';
 import 'package:inventory_system/features/warehouse/DAOs/warehouse_dao.dart';
 import 'package:inventory_system/features/warehouse/models/warehouse_model.dart';
 import 'package:inventory_system/features/warehouse/ui/widgets/edit_warehouse.dart';
+import 'package:inventory_system/shared/extensions/navigator_extension.dart';
 import 'package:inventory_system/shared/hoc/with_company_id.dart';
 import 'package:inventory_system/shared/ui/widgets/permission_controlled_action_button.dart';
 import 'package:provider/provider.dart';
@@ -33,7 +35,7 @@ class WarehouseActions extends StatelessWidget {
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => EditWarehouseScreen(warehouse: warehouse),
+              builder: (context) => EditWarehouseWidget(warehouse: warehouse),
             ),
           );
         },
@@ -69,7 +71,9 @@ class WarehouseActions extends StatelessWidget {
               child: const Text('Delete'),
               onPressed: () async {
                 await _deleteWarehouse(context);
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pushReplacementNamedNoTransition(
+                    RoutePaths.warehouses,
+                    arguments: 0); // Close the dialog
               },
             ),
           ],

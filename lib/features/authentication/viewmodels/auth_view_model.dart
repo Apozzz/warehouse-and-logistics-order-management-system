@@ -7,7 +7,6 @@ import 'package:inventory_system/features/authentication/viewmodels/google_authe
 import 'package:inventory_system/features/authentication/viewmodels/mobile_number_authentication_view_model.dart';
 import 'package:inventory_system/features/user/services/user_service.dart';
 import 'package:inventory_system/shared/extensions/navigator_extension.dart';
-import 'package:inventory_system/features/user/models/user_model.dart' as user;
 import 'package:provider/provider.dart';
 
 class AuthViewModel extends ChangeNotifier {

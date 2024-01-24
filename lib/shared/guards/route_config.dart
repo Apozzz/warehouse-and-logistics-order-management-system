@@ -18,6 +18,7 @@ import 'package:inventory_system/features/role/ui/pages/role_page.dart';
 import 'package:inventory_system/features/user/models/user_model.dart';
 import 'package:inventory_system/features/user/ui/pages/user_details_form_page.dart';
 import 'package:inventory_system/features/vehicle/ui/pages/vehicle_page.dart';
+import 'package:inventory_system/features/warehouse/ui/pages/warehouse_and_sector_page.dart';
 import 'package:inventory_system/features/warehouse/ui/pages/warehouse_page.dart';
 import 'package:inventory_system/shared/providers/company_provider.dart';
 import 'package:inventory_system/shared/ui/pages/no_access_page.dart';
@@ -124,7 +125,10 @@ final List<RouteConfig> routeConfigs = [
   ),
   RouteConfig(
     path: RoutePaths.warehouses,
-    builder: (_) => const WarehousePage(),
+    builderWithArgs: (_, args) {
+      final tabIndex = args is int ? args : 0;
+      return WarehouseAndSectorPage(initialTabIndex: tabIndex);
+    },
     isProtected: true,
     appPage: AppPage.Warehouses,
   ),

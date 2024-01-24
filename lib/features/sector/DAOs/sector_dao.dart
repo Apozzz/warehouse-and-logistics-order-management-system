@@ -53,5 +53,14 @@ class SectorDAO {
     }
   }
 
+  Future<Sector> getSectorById(String sectorId) async {
+    final docSnapshot =
+        await _firestore.collection('sectors').doc(sectorId).get();
+    if (docSnapshot.exists) {
+      return Sector.fromMap(docSnapshot.data()!, docSnapshot.id);
+    }
+    throw Exception('Product not found');
+  }
+
   // Additional methods as needed...
 }

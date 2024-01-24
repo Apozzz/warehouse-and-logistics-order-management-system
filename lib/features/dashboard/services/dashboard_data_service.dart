@@ -19,12 +19,6 @@ class DashboardDataService {
     final userDAO = Provider.of<UserDAO>(context,
         listen: false); // Assume you have a UserDAO
 
-    // Initialize your data variables
-    int totalOrders = 0;
-    int totalDeliveries = 0;
-    int totalProducts = 0; // New data variable
-    int totalUsers = 0; // New data variable
-
     // Use a Completer to manage the asynchronous operation
     Completer<DashboardData> dataCompleter = Completer();
 

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:inventory_system/constants/route_paths.dart';
 import 'package:inventory_system/features/order/DAOs/order_dao.dart';
 import 'package:inventory_system/features/order/models/order_model.dart';
-import 'package:inventory_system/features/order/ui/pages/order_page.dart';
 import 'package:inventory_system/features/order/ui/widgets/order_form.dart';
 import 'package:inventory_system/features/product/DAOs/product_dao.dart';
 import 'package:inventory_system/features/product/models/product_model.dart';

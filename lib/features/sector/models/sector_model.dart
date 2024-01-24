@@ -45,6 +45,15 @@ class Sector {
     );
   }
 
+  static Sector empty() {
+    return Sector(
+      id: '',
+      name: '',
+      companyId: '',
+      description: '',
+    );
+  }
+
   @override
   String toString() {
     return 'Sector{id: $id, companyId: $companyId, name: $name, description: $description}';

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/constants/route_paths.dart';
 import 'package:inventory_system/features/sector/DAOs/sector_dao.dart';
 import 'package:inventory_system/features/sector/models/sector_model.dart';
 import 'package:inventory_system/features/sector/ui/widgets/sector_form.dart';
+import 'package:inventory_system/shared/extensions/navigator_extension.dart';
 import 'package:provider/provider.dart';
 
 class EditSectorScreen extends StatefulWidget {
@@ -30,7 +32,9 @@ class _EditSectorScreenState extends State<EditSectorScreen> {
         companyId: widget.sector.companyId,
         onSubmit: (updatedSector) async {
           await sectorDAO.updateSector(widget.sector.id, updatedSector.toMap());
-          Navigator.of(context).pop(); // Go back after updating sector
+          Navigator.of(context).pushReplacementNamedNoTransition(
+              RoutePaths.warehouses,
+              arguments: 1); // Go back after updating sector
         },
       ),
     );

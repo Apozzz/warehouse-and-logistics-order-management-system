@@ -11,6 +11,8 @@ class Product {
   final DateTime createdAt;
   final String companyId;
   final Set<String> categories; // Optional: for categorizing products
+  final String? sectorId;
+
   // final double height;
   // final double length;
   // final double width;
@@ -26,6 +28,7 @@ class Product {
     required this.createdAt,
     required this.companyId,
     required this.categories,
+    this.sectorId,
     // required this.height,
     // required this.length,
     // required this.width,
@@ -52,6 +55,7 @@ class Product {
       createdAt: createdAt,
       companyId: data['companyId'] ?? '',
       categories: categories ?? {},
+      sectorId: data['sectorId'],
       // height: data['height']?.toDouble() ?? 0.0,
       // length: data['length']?.toDouble() ?? 0.0,
       // width: data['width']?.toDouble() ?? 0.0,
@@ -69,6 +73,7 @@ class Product {
       'createdAt': createdAt,
       'companyId': companyId,
       'categories': categories,
+      'sectorId': sectorId,
     };
   }
 
@@ -84,6 +89,7 @@ class Product {
       createdAt: DateTime.now(),
       companyId: '',
       categories: {},
+      sectorId: null,
     );
   }
 }

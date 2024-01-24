@@ -22,7 +22,7 @@ class _PackageProgressOverviewPageState
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(_handleTabSelection);
   }
 
@@ -48,6 +48,7 @@ class _PackageProgressOverviewPageState
           tabs: const [
             Tab(text: 'Packaging'),
             Tab(text: 'Transportation'),
+            Tab(text: 'Finished'),
           ],
         ),
       ),

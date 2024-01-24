@@ -90,6 +90,17 @@ class PackagingService {
         : deliveries;
   }
 
+  Future<List<Delivery>> fetchFinishedDeliveries(String companyId,
+      {String? userId}) async {
+    List<Delivery> deliveries =
+        await deliveryDAO.fetchFinishedDeliveries(companyId);
+
+    // Filter deliveries by userId if provided
+    return userId?.isNotEmpty ?? false
+        ? deliveries.where((delivery) => delivery.userId == userId).toList()
+        : deliveries;
+  }
+
   Future<void> scanAndProcessPackage(String deliveryId, String barcode) async {
     final packageProgressList =
         await packageProgressDAO.getPackageProgressByDeliveryId(deliveryId);
@@ -98,7 +109,10 @@ class PackagingService {
       if (package.scanCode == barcode) {
         if (package.status == PackageProgressStatus.Packaged) {
           // If already packaged, return or notify caller
-          return;
+          // TODO: change back to return, when testing is not needed. It's currently
+          // changed to continue; because of trouble of getting many different barcodes in Virtual Device
+          //return;
+          continue;
         }
 
         int newPackagedQuantity = package.packagedQuantity + 1;
