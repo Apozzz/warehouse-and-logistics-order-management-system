@@ -1,6 +1,7 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:inventory_system/features/order/models/order_model.dart';
+import 'package:inventory_system/features/order/ui/widgets/order_status_urgent_icon.dart';
 
 class OrderSelect extends StatefulWidget {
   final Order? initialOrder;
@@ -30,8 +31,15 @@ class _OrderSelectState extends State<OrderSelect> {
   @override
   Widget build(BuildContext context) {
     return DropdownSearch<Order>(
-      popupProps: const PopupProps.menu(
+      popupProps: PopupProps.menu(
         showSearchBox: true,
+        itemBuilder: (context, item, isSelected) {
+          return ListTile(
+            leading: OrderStatusLeadingIcon(status: item.status),
+            title: Text(item.id),
+            subtitle: Text('Status: ${item.status.toString().split('.').last}'),
+          );
+        },
       ),
       items: widget.allOrders,
       itemAsString: (Order order) => 'Order ID: ${order.id}',

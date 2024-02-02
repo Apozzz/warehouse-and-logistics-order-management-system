@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:inventory_system/enums/delivery_status.dart';
+import 'package:inventory_system/features/delivery/models/transportation_details.dart';
 
 class Delivery {
   final String id;
@@ -9,6 +10,7 @@ class Delivery {
   final String userId;
   final DeliveryStatus status;
   final String companyId;
+  final TransportationDetails? transportationDetails;
 
   Delivery({
     required this.id,
@@ -18,6 +20,7 @@ class Delivery {
     required this.userId,
     required this.status,
     required this.companyId,
+    this.transportationDetails,
   });
 
   // Factory constructor to create a Delivery instance from a Map
@@ -30,6 +33,9 @@ class Delivery {
       userId: data['userId'] as String,
       status: DeliveryStatus.values[data['status']],
       companyId: data['companyId'],
+      transportationDetails: data['transportationDetails'] != null
+          ? TransportationDetails.fromMap(data['transportationDetails'])
+          : null,
     );
   }
 
@@ -42,6 +48,7 @@ class Delivery {
       'userId': userId,
       'status': status.index,
       'companyId': companyId,
+      'transportationDetails': transportationDetails?.toMap(),
     };
   }
 
@@ -54,6 +61,7 @@ class Delivery {
     String? userId,
     DeliveryStatus? status,
     String? companyId,
+    TransportationDetails? transportationDetails,
   }) {
     return Delivery(
       id: id ?? this.id,
@@ -63,6 +71,8 @@ class Delivery {
       userId: userId ?? this.userId,
       status: status ?? this.status,
       companyId: companyId ?? this.companyId,
+      transportationDetails:
+          transportationDetails ?? this.transportationDetails,
     );
   }
 
@@ -113,6 +123,7 @@ class Delivery {
       userId: '',
       status: DeliveryStatus.NotStarted,
       companyId: '',
+      transportationDetails: null,
     );
   }
 }

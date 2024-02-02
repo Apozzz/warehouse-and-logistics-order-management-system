@@ -3,10 +3,12 @@ import 'package:inventory_system/enums/delivery_status.dart';
 import 'package:inventory_system/enums/order_status.dart';
 import 'package:inventory_system/features/delivery/DAOs/delivery_dao.dart';
 import 'package:inventory_system/features/delivery/models/delivery_model.dart';
+import 'package:inventory_system/features/delivery/models/transportation_details.dart';
 import 'package:inventory_system/features/order/DAOs/order_dao.dart';
 import 'package:inventory_system/features/order/models/order_model.dart';
 import 'package:inventory_system/features/order/ui/widgets/order_status_floating_action_button.dart';
 import 'package:inventory_system/features/packages/ui/widgets/delivery_detail_content.dart';
+import 'package:inventory_system/shared/providers/delivery_tracking_provider.dart';
 import 'package:inventory_system/shared/ui/widgets/base_scaffold.dart';
 import 'package:provider/provider.dart';
 
@@ -33,6 +35,60 @@ class _PackageTransportDetailPageState
   void initState() {
     super.initState();
     _ordersFuture = fetchOrders(widget.deliveryId);
+  }
+
+  Future<void> startDelivery(List<Order> deliveryOrders) async {
+    Provider.of<DeliveryTrackingProvider>(context, listen: false)
+        .startDeliveryTracking();
+    await updateOrderStatuses(deliveryOrders, OrderStatus.InTransit);
+    setState(() {
+      _isDeliveryInProgress = true;
+      _showMap = true;
+    });
+    refreshOrders();
+  }
+
+  Future<void> endDelivery() async {
+    final deliveryDAO = Provider.of<DeliveryDAO>(context, listen: false);
+    final deliveryTrackingProvider =
+        Provider.of<DeliveryTrackingProvider>(context, listen: false);
+
+    // Stop the delivery tracking
+    await deliveryTrackingProvider.endDeliveryTracking(widget.deliveryId);
+
+    // Retrieve the final route image URL
+    String? imageUrl = deliveryTrackingProvider.finalRouteImageUrl;
+    double? distanceTraveled = deliveryTrackingProvider.distanceTraveled;
+    Duration? timeSpent = deliveryTrackingProvider.timeSpent;
+
+    // Create or update TransportationDetails
+    TransportationDetails transportationDetails = TransportationDetails(
+      deliveryId: widget.deliveryId,
+      pathImageUrl: imageUrl,
+      distanceTraveled: distanceTraveled,
+      timeTaken: timeSpent,
+      // You can add more fields like distanceTraveled and timeTaken if available
+    );
+
+    // Update the Delivery object
+    Delivery updatedDelivery = _currentDelivery.copyWith(
+      status: DeliveryStatus.Delivered,
+      transportationDetails: transportationDetails,
+    );
+
+    // Save the updated Delivery object
+    await deliveryDAO.updateDelivery(
+        widget.deliveryId, updatedDelivery.toMap());
+
+    // Update local state
+    setState(() {
+      _currentDelivery = updatedDelivery;
+      _isDeliveryInProgress = false;
+      _showMap = false;
+    });
+
+    // Refresh the orders to reflect the new status
+    refreshOrders();
   }
 
   Future<List<Order>> fetchOrders(String deliveryId) async {
@@ -99,22 +155,8 @@ class _PackageTransportDetailPageState
           return DeliveryDetailContent(
             deliveryOrders: deliveryOrders,
             isDeliveryInProgress: _isDeliveryInProgress,
-            onStartDelivery: () async {
-              await updateOrderStatuses(deliveryOrders, OrderStatus.InTransit);
-              setState(() {
-                _isDeliveryInProgress = true;
-                _showMap = true;
-              });
-              refreshOrders();
-            },
-            onEndDelivery: () async {
-              await updateDeliveryStatus(DeliveryStatus.Delivered);
-              setState(() {
-                _isDeliveryInProgress = false;
-                _showMap = false;
-              });
-              refreshOrders();
-            },
+            onStartDelivery: () => startDelivery(deliveryOrders),
+            onEndDelivery: () => endDelivery(),
             showMap: _showMap,
             orderAddresses: orderAddresses,
             delivery: _currentDelivery,

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:inventory_system/features/google_maps/services/google_maps_service.dart';
+import 'package:inventory_system/shared/services/location_tracking_service.dart';
+import 'package:inventory_system/utils/lat_lant_converter.dart';
+import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 
 class GoogleMapWidget extends StatefulWidget {
@@ -17,7 +20,7 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
   Set<Marker> _markers = {};
   Set<Polyline> _polylines = {};
   LatLng? currentLocation;
-
+  late LocationTrackingService locationTrackingService;
   late Future<void> _mapFuture;
 
   @override
@@ -26,16 +29,30 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
     _mapFuture = _loadMapComponents();
   }
 
+  void _updateUserLocation(LatLng newLocation) {
+    setState(() {
+      currentLocation = newLocation;
+      _markers.add(Marker(
+        markerId: const MarkerId('user_location'),
+        position: newLocation,
+      ));
+      // Optionally update the route or camera position
+    });
+  }
+
   Future<void> _loadMapComponents() async {
     final googleMapsService =
         Provider.of<GoogleMapsService>(context, listen: false);
-    currentLocation = await googleMapsService.getCurrentLocation();
+    final locationTrackingService =
+        Provider.of<LocationTrackingService>(context, listen: false);
+
+    currentLocation = await locationTrackingService.getCurrentLocation();
     Set<Marker> markers = {};
     List<LatLng> waypoints = [];
 
     for (String address in widget.addresses) {
-      LatLng location =
-          await googleMapsService.getCoordinatesFromAddress(address);
+      LatLng location = toGoogleMapsLatLng(
+          await googleMapsService.getCoordinatesFromAddress(address));
       waypoints.add(location);
 
       markers.add(Marker(
@@ -46,8 +63,12 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
     }
 
     if (waypoints.isNotEmpty) {
-      List<LatLng> routePoints = await googleMapsService.getRouteCoordinates(
-          currentLocation!, waypoints);
+      List<LatLng> routePoints = toGoogleMapsLatLngList(
+        await googleMapsService.getRouteCoordinates(
+          toMapsToolkitLatLng(currentLocation!),
+          toMapsToolkitLatLngList(waypoints),
+        ),
+      );
 
       setState(() {
         _markers = markers;
@@ -81,6 +102,7 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
         }
 
         return GoogleMap(
+          padding: const EdgeInsets.only(bottom: 80.0),
           onMapCreated: _onMapCreated,
           initialCameraPosition: CameraPosition(
             target: currentLocation ??

@@ -40,7 +40,7 @@ class OrderStatusFloatingActionButton extends StatelessWidget {
                     if (newStatus == OrderStatus.Delivered &&
                         imageFile != null) {
                       imageUrl = await imageService.uploadImage(
-                          imageFile, 'orderImages/${updatedOrder.id}');
+                          imageFile, 'orderImages/${updatedOrder.id}.png');
                     }
 
                     updatedOrder = updatedOrder.copyWith(

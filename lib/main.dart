@@ -42,9 +42,11 @@ import 'package:inventory_system/shared/guards/route_config.dart';
 import 'package:inventory_system/shared/guards/route_guard.dart';
 import 'package:inventory_system/shared/managers/navigation_manager.dart';
 import 'package:inventory_system/shared/providers/company_provider.dart';
+import 'package:inventory_system/shared/providers/delivery_tracking_provider.dart';
 import 'package:inventory_system/shared/providers/navigation_provider.dart';
 import 'package:inventory_system/shared/services/camera_service.dart';
 import 'package:inventory_system/shared/services/images_service.dart';
+import 'package:inventory_system/shared/services/location_tracking_service.dart';
 import 'package:inventory_system/shared/services/permission_service.dart';
 import 'package:inventory_system/theme.dart';
 import 'package:provider/provider.dart';
@@ -91,6 +93,8 @@ void main() async {
       Provider<DashboardDataService>(create: (_) => DashboardDataService()),
       Provider<ImageService>(create: (_) => ImageService()),
       Provider<CameraService>(create: (_) => CameraService()),
+      Provider<LocationTrackingService>(
+          create: (_) => LocationTrackingService()),
       Provider<GoogleMapsService>(create: (_) => GoogleMapsService(apiKey)),
       ChangeNotifierProvider(create: (_) => NavigationProvider()),
       ChangeNotifierProvider(
@@ -141,6 +145,13 @@ void main() async {
         create: (context) => MobileNumberAuthViewModel(
           MobileNumberAuthentication(),
           Provider.of<AuthViewModel>(context, listen: false),
+        ),
+      ),
+      ChangeNotifierProvider(
+        create: (context) => DeliveryTrackingProvider(
+          Provider.of<LocationTrackingService>(context, listen: false),
+          Provider.of<GoogleMapsService>(context, listen: false),
+          Provider.of<ImageService>(context, listen: false),
         ),
       ),
       Provider<CompanyService>(

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:inventory_system/enums/app_page.dart';
+import 'package:inventory_system/enums/order_status.dart';
 import 'package:inventory_system/enums/permission_type.dart';
 import 'package:inventory_system/features/notification/services/notification_service.dart';
 import 'package:inventory_system/features/order/DAOs/order_dao.dart';
 import 'package:inventory_system/features/order/models/order_model.dart';
 import 'package:inventory_system/features/order/ui/widgets/edit_order.dart';
+import 'package:inventory_system/features/order/ui/widgets/order_status_urgent_icon.dart';
 import 'package:inventory_system/shared/hoc/with_company_id.dart';
 import 'package:inventory_system/shared/ui/widgets/permission_controlled_action_button.dart';
 import 'package:inventory_system/utils/pdf_generator.dart';
@@ -59,6 +61,7 @@ class _OrderListState extends State<OrderList> {
           itemBuilder: (context, index) {
             final order = orders[index];
             return ListTile(
+              leading: OrderStatusLeadingIcon(status: order.status),
               title: Text('Order #${order.id}'),
               subtitle: Text(
                   'Total: ${order.total} - Date: ${order.createdAt.toString()}'),

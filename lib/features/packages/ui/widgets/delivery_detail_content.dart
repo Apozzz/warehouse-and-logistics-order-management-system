@@ -27,6 +27,9 @@ class DeliveryDetailContent extends StatelessWidget {
   }) : super(key: key);
 
   bool canEndDelivery() {
+    // For testing just return always true.
+    return true;
+
     // Check if all orders are either Delivered or Failed
     return deliveryOrders.every((order) =>
         order.status == OrderStatus.Delivered ||

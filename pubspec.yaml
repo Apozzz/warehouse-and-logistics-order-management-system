@@ -93,6 +93,8 @@ dependencies:
   location: ^5.0.3
   image_picker: ^1.0.7
   firebase_storage: ^11.6.0
+  json_annotation: ^4.8.1
+  maps_toolkit: ^3.0.0
 
 dev_dependencies:
   flutter_test:
@@ -104,6 +106,9 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
+  build_runner: ^2.4.8
+  json_serializable: ^6.7.1
+  analyzer: ^5.13.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

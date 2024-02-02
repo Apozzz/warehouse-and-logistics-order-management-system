@@ -1,8 +1,9 @@
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:typed_data';
 
-import 'package:location/location.dart';
+import 'package:http/http.dart' as http;
+import 'package:inventory_system/features/google_maps/models/directions_response.dart';
+import 'package:maps_toolkit/maps_toolkit.dart';
 
 class GoogleMapsService {
   final String apiKey;
@@ -34,65 +35,67 @@ class GoogleMapsService {
         waypoints.map((w) => '${w.latitude},${w.longitude}').join('|');
     final url = Uri.parse(
         'https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${origin.latitude},${origin.longitude}&waypoints=optimize:true|$waypointString&mode=driving&key=$apiKey');
+    print(url);
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
-      List<LatLng> routePoints = [];
+      final directionsResponse = DirectionsResponse.fromJson(jsonResponse);
+      List<LatLng> polylinePoints = [];
       double totalDistance = 0.0; // In meters
       double totalDuration = 0.0; // In seconds
 
-      if (jsonResponse['routes'] != null && jsonResponse['routes'].isNotEmpty) {
-        final legs = jsonResponse['routes'][0]['legs'];
-        for (var leg in legs) {
-          totalDistance += leg['distance']['value'];
-          totalDuration += leg['duration']['value'];
+      if (directionsResponse.routes.isNotEmpty) {
+        final legs = directionsResponse.routes[0].legs;
+        String encodedPolyline =
+            directionsResponse.routes[0].overviewPolyline.points;
+        List<LatLng> decodedPolylinePoints =
+            PolygonUtil.decode(encodedPolyline);
+        polylinePoints = decodedPolylinePoints
+            .map((point) => LatLng(point.latitude, point.longitude))
+            .toList();
 
-          for (var step in leg['steps']) {
-            LatLng startLocation = LatLng(
-                step['start_location']['lat'], step['start_location']['lng']);
-            LatLng endLocation = LatLng(
-                step['end_location']['lat'], step['end_location']['lng']);
-            routePoints.add(startLocation);
-            routePoints.add(endLocation);
-          }
+        for (var leg in legs) {
+          totalDistance += leg.distance.value;
+          totalDuration += leg.duration.value;
         }
 
+        // Optionally, you can print or store the total distance and duration
         print('Total distance: ${totalDistance / 1000} km'); // Convert to km
         print(
             'Total duration: ${totalDuration / 60} minutes'); // Convert to minutes
+      } else {
+        throw Exception("No routes found");
       }
 
-      return routePoints;
+      return polylinePoints;
     } else {
       throw Exception('Failed to fetch route');
     }
   }
 
-  Future<LatLng> getCurrentLocation() async {
-    Location location = Location();
+  Future<Uint8List?> getGoogleMapsStaticMap(List<LatLng> pathPoints) async {
+    try {
+      // Encode the list of LatLng objects into a polyline using maps_toolkit
+      String encodedPolyline = PolygonUtil.encode(
+        pathPoints
+            .map((point) => LatLng(point.latitude, point.longitude))
+            .toList(),
+      );
 
-    bool serviceEnabled;
-    PermissionStatus permissionGranted;
-    LocationData locationData;
+      String polylineStyle = 'color:0x0000ff|weight:4';
 
-    serviceEnabled = await location.serviceEnabled();
-    if (!serviceEnabled) {
-      serviceEnabled = await location.requestService();
-      if (!serviceEnabled) {
-        return const LatLng(0, 0);
+      final url = Uri.parse(
+          'https://maps.googleapis.com/maps/api/staticmap?size=600x300&path=$polylineStyle|enc:$encodedPolyline&key=$apiKey');
+
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        return response.bodyBytes;
       }
+      print('Failed to load static map image');
+    } catch (e) {
+      print('Error fetching static map: $e');
     }
-
-    permissionGranted = await location.hasPermission();
-    if (permissionGranted == PermissionStatus.denied) {
-      permissionGranted = await location.requestPermission();
-      if (permissionGranted != PermissionStatus.granted) {
-        return const LatLng(0, 0);
-      }
-    }
-
-    locationData = await location.getLocation();
-    return LatLng(locationData.latitude ?? 0.0, locationData.longitude ?? 0.0);
+    return null; // Return null if there was an error
   }
 }

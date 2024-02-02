@@ -2,6 +2,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:inventory_system/features/category/services/category_service.dart';
 import 'package:inventory_system/features/order/models/order_model.dart';
+import 'package:inventory_system/features/order/ui/widgets/order_status_urgent_icon.dart';
 import 'package:provider/provider.dart';
 
 class OrderMultiSelect extends StatefulWidget {
@@ -63,6 +64,13 @@ class _OrderMultiSelectState extends State<OrderMultiSelect> {
         disabledItemFn: (Order order) => !isOrderCompatible(order),
         showSelectedItems: true,
         showSearchBox: true,
+        itemBuilder: (context, item, isSelected) {
+          return ListTile(
+            leading: OrderStatusLeadingIcon(status: item.status),
+            title: Text(item.id),
+            subtitle: Text('Status: ${item.status.toString().split('.').last}'),
+          );
+        },
         onItemAdded: (List<Order> selected, Order currentlySelected) {
           widget.onSelectionChanged(selected);
           setState(() => selectedOrders = selected);
