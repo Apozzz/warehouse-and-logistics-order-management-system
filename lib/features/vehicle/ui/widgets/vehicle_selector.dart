@@ -1,5 +1,6 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:inventory_system/enums/driving_category.dart';
 import 'package:inventory_system/features/category/services/category_service.dart';
 import 'package:inventory_system/features/vehicle/models/vehicle_model.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +10,7 @@ class VehicleSelect extends StatefulWidget {
   final Function(Vehicle?) onSelected;
   final List<Vehicle> allVehicles;
   final Set<String> categoryIdsToCheck;
+  final Set<DrivingLicenseCategory>? driverLicenseCategories;
 
   const VehicleSelect({
     Key? key,
@@ -16,6 +18,7 @@ class VehicleSelect extends StatefulWidget {
     required this.onSelected,
     required this.allVehicles,
     required this.categoryIdsToCheck,
+    this.driverLicenseCategories,
   }) : super(key: key);
 
   @override

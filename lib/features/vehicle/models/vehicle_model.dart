@@ -1,14 +1,18 @@
+import 'package:inventory_system/enums/driving_category.dart';
+
 class Vehicle {
-  String id;
-  String companyId;
-  String type;
-  double maxWeight; // Maximum weight capacity in kilograms or pounds
-  double maxVolume; // Maximum volume capacity in cubic meters or cubic feet
-  bool availability;
-  String registrationNumber;
-  double distance;
-  List<String> assignedOrderIds;
-  Set<String> allowedCategories;
+  final String id;
+  final String companyId;
+  final String type;
+  final double maxWeight; // Maximum weight capacity in kilograms or pounds
+  final double
+      maxVolume; // Maximum volume capacity in cubic meters or cubic feet
+  final bool availability;
+  final String registrationNumber;
+  final double distance;
+  final List<String> assignedOrderIds;
+  final Set<String> allowedCategories;
+  final DrivingLicenseCategory requiredLicenseCategory;
 
   Vehicle({
     required this.id,
@@ -20,7 +24,8 @@ class Vehicle {
     required this.registrationNumber,
     this.distance = 0.0,
     this.assignedOrderIds = const [],
-    required this.allowedCategories,
+    this.allowedCategories = const {},
+    required this.requiredLicenseCategory,
   });
 
   // Factory constructor for creating a Vehicle from a map (e.g., from JSON)
@@ -36,6 +41,10 @@ class Vehicle {
       distance: map['distance']?.toDouble() ?? 0.0,
       assignedOrderIds: List<String>.from(map['assignedOrderIds'] ?? []),
       allowedCategories: Set<String>.from(map['allowedCategories'] ?? []),
+      requiredLicenseCategory: DrivingLicenseCategory.values.firstWhere(
+        (e) => e.toString().split('.').last == map['requiredLicenseCategory'],
+        orElse: () => DrivingLicenseCategory.AM,
+      ),
     );
   }
 
@@ -51,6 +60,7 @@ class Vehicle {
       distance: 0.0, // Default distance
       assignedOrderIds: const [],
       allowedCategories: const {},
+      requiredLicenseCategory: DrivingLicenseCategory.B,
     );
   }
 
@@ -66,6 +76,8 @@ class Vehicle {
       'distance': distance,
       'assignedOrderIds': assignedOrderIds,
       'allowedCategories': allowedCategories,
+      'requiredLicenseCategory':
+          requiredLicenseCategory.toString().split('.').last,
     };
   }
 

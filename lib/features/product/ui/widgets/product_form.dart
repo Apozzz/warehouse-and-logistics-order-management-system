@@ -40,6 +40,7 @@ class _ProductFormState extends State<ProductForm> {
   Warehouse? _selectedWarehouse;
   Sector? _selectedSector;
   List<Category> _selectedCategories = []; // Add this line
+  bool _barcodeScanned = false;
 
   @override
   void initState() {
@@ -114,23 +115,41 @@ class _ProductFormState extends State<ProductForm> {
               },
             ),
             const SizedBox(height: 10),
+            if (_barcodeController.text.isNotEmpty)
+              Container(
+                padding: const EdgeInsets.all(10),
+                color: Colors.grey[200], // Light grey background
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Scanned Barcode: ${_barcodeController.text}',
+                        style: const TextStyle(color: Colors.green),
+                      ),
+                    ),
+                    const Icon(Icons.check_circle, color: Colors.green),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () async {
                 final barcode = await BarcodeScanner.scanBarcode(context);
                 if (barcode != null && barcode != '-1') {
-                  _barcodeController.text = barcode;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Scanned barcode: $barcode')),
-                  );
-                  print('Scanned barcode: $barcode');
-                } else if (barcode == '-1') {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Barcode scanning cancelled')),
-                  );
-                  print('Barcode scanning cancelled');
+                  setState(() {
+                    _barcodeController.text = barcode;
+                    _barcodeScanned = true;
+                  });
+                } else {
+                  setState(() {
+                    _barcodeScanned = false;
+                  });
                 }
               },
-              child: const Text('Scan Barcode'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _barcodeScanned ? Colors.green : null,
+              ),
+              child: Text(_barcodeScanned ? 'Rescan Barcode' : 'Scan Barcode'),
             ),
             const SizedBox(height: 10),
             TextFormField(

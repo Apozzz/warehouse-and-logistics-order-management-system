@@ -54,10 +54,14 @@ class _OrderFormState extends State<OrderForm> {
 
       // Initialize _selectedProducts based on _selectedOrderItems
       _selectedProducts = _selectedOrderItems.map((orderItem) {
-        return widget.allProducts.firstWhere(
+        // Find the corresponding product in allProducts to get the base product details
+        var baseProduct = widget.allProducts.firstWhere(
           (product) => product.id == orderItem.productId,
           orElse: () => Product.empty(),
         );
+
+        // Update the product's quantity based on the orderItem's quantity
+        return baseProduct.copyWith(quantity: orderItem.quantity);
       }).toList();
     }
   }
@@ -83,7 +87,7 @@ class _OrderFormState extends State<OrderForm> {
             ? existingItem // Use existing OrderItem if found
             : OrderItem(
                 productId: product.id,
-                quantity: 1,
+                quantity: product.quantity,
                 price: product.price,
                 scanCode: product.scanCode,
               ); // New product selected

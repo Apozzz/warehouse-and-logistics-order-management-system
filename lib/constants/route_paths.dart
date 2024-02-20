@@ -18,5 +18,6 @@ class RoutePaths {
   static const String userDetails = '/userDetails';
   static const String categories = '/categories';
   static const String packaging = '/packaging';
+  static const String noInternetConnection = '/noInternetConnection';
   // Add more paths as needed
 }

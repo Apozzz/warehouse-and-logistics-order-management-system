@@ -4,7 +4,6 @@ import 'package:inventory_system/enums/delivery_status.dart';
 import 'package:inventory_system/features/delivery/models/delivery_model.dart';
 import 'package:inventory_system/features/delivery/ui/widgets/delivery_status_selector.dart';
 import 'package:inventory_system/features/packages/services/packaging_service.dart';
-import 'package:inventory_system/features/user/DAOs/user_dao.dart';
 import 'package:inventory_system/features/user/models/user_model.dart';
 import 'package:inventory_system/features/user/ui/widgets/driver_select.dart';
 import 'package:inventory_system/features/vehicle/ui/widgets/vehicle_selector.dart';
@@ -119,6 +118,8 @@ class _DeliveryFormState extends State<DeliveryForm> {
             DriverSelect(
               companyId: widget.companyId,
               initialDriverId: _selectedDriverId,
+              requiredLicenseCategory:
+                  _selectedVehicle?.requiredLicenseCategory,
               onSelected: (User? driver) {
                 setState(() {
                   _selectedDriverId = driver?.id;

@@ -106,7 +106,6 @@ class OrderDAO {
       final orderDocs = await _firestore
           .collection('orders')
           .where(FieldPath.documentId, whereIn: orderIds)
-          .orderBy('status')
           .get();
 
       return orderDocs.docs

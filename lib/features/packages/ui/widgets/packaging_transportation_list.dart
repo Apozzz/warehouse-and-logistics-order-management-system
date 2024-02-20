@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:inventory_system/enums/delivery_status.dart';
 import 'package:inventory_system/features/authentication/viewmodels/auth_view_model.dart';
 import 'package:inventory_system/features/delivery/models/delivery_model.dart';
+import 'package:inventory_system/features/delivery/services/ongoing_delivery_session_servide.dart';
+import 'package:inventory_system/features/delivery/ui/widgets/ongoing_session_dialog.dart';
 import 'package:inventory_system/features/notification/services/notification_service.dart';
 import 'package:inventory_system/features/order/DAOs/order_dao.dart';
 import 'package:inventory_system/features/order/models/order_model.dart';
@@ -48,6 +50,7 @@ class PackagingTransportationList extends StatelessWidget {
             userId: userId);
       case 1:
         // Fetch transit deliveries
+        await _checkAndHandleOngoingSession(context);
         return packagingService.fetchTransportingDeliveries(companyId,
             userId: userId);
       case 2:
@@ -58,13 +61,45 @@ class PackagingTransportationList extends StatelessWidget {
     }
   }
 
+  Future<void> _checkAndHandleOngoingSession(BuildContext context) async {
+    final userId =
+        Provider.of<AuthViewModel>(context, listen: false).currentUser?.uid;
+
+    if (userId == null) {
+      return;
+    }
+
+    final sessionService =
+        Provider.of<OngoingDeliverySessionService>(context, listen: false);
+    final ongoingSession = await sessionService.getSessionByUser(userId);
+
+    if (ongoingSession != null) {
+      await showDialog(
+        context: context,
+        builder: (BuildContext context) => OngoingSessionDialog(
+          deliveryId: ongoingSession.deliveryId,
+          onContinue: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => PackageTransportDetailPage(
+                  deliveryId: ongoingSession.deliveryId,
+                  ongoingSession: ongoingSession,
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final PdfGenerator pdfGenerator = PdfGenerator();
     final notification =
         Provider.of<NotificationService>(context, listen: false);
 
-    return FutureBuilder<List<dynamic>>(
+    return FutureBuilder<List<Delivery>>(
       future: fetchDeliveriesWithCriteria(
           context), // This will change based on the selected tab
       builder: (context, snapshot) {
@@ -146,22 +181,31 @@ class PackagingTransportationList extends StatelessWidget {
               onTap: () {
                 switch (tabController.index) {
                   case 0:
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) =>
-                          PackageProgressPage(deliveryId: dataItem.id),
-                    ));
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            PackageProgressPage(deliveryId: dataItem.id),
+                      ),
+                    );
                     break;
                   case 1:
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) =>
-                          PackageTransportDetailPage(deliveryId: dataItem.id),
-                    ));
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            PackageTransportDetailPage(deliveryId: dataItem.id),
+                      ),
+                    );
                     break;
                   case 2:
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) =>
-                          PackageFinishedDetailPage(deliveryId: dataItem.id),
-                    ));
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => PackageFinishedDetailPage(
+                          deliveryId: dataItem.id,
+                          delivery: dataItem,
+                          orderIds: dataItem.orderIds,
+                        ),
+                      ),
+                    );
                   default:
                     // Handle the default case or do nothing
                     break;

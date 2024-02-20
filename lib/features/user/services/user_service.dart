@@ -29,6 +29,7 @@ class UserService {
         phoneNumber: firebaseUser.phoneNumber ?? '',
         createdAt: DateTime.now(),
         companyIds: [],
+        licensesHeld: {},
       );
       await _userDAO.createUser(newUser);
     }

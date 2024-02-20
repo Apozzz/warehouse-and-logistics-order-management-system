@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:inventory_system/features/authentication/ui/pages/auth_selection_page.dart';
 import 'package:inventory_system/features/authentication/viewmodels/auth_view_model.dart';
-import 'package:inventory_system/enums/app_page.dart';
 import 'package:inventory_system/shared/guards/route_config.dart';
 import 'package:inventory_system/shared/models/view_permissions.dart';
 import 'package:inventory_system/shared/services/permission_service.dart';

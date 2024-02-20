@@ -77,6 +77,34 @@ class Product {
     };
   }
 
+  Product copyWith({
+    String? id,
+    String? name,
+    String? description,
+    String? scanCode,
+    double? price,
+    String? warehouseId,
+    int? quantity,
+    DateTime? createdAt,
+    String? companyId,
+    Set<String>? categories,
+    String? sectorId,
+  }) {
+    return Product(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      scanCode: scanCode ?? this.scanCode,
+      price: price ?? this.price,
+      warehouseId: warehouseId ?? this.warehouseId,
+      quantity: quantity ?? this.quantity,
+      createdAt: createdAt ?? this.createdAt,
+      companyId: companyId ?? this.companyId,
+      categories: categories ?? this.categories,
+      sectorId: sectorId ?? this.sectorId,
+    );
+  }
+
   static Product empty() {
     return Product(
       id: '',

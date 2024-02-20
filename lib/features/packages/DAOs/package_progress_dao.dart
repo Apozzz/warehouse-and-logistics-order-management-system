@@ -85,5 +85,17 @@ class PackageProgressDAO {
     }
   }
 
+  Future<List<PackageProgress>> getPackageProgressByOrderId(
+      String orderId) async {
+    final packageProgressDocs = await _db
+        .collection('packageProgress')
+        .where('orderId', isEqualTo: orderId)
+        .get();
+
+    return packageProgressDocs.docs
+        .map((doc) => PackageProgress.fromMap(doc.data(), doc.id))
+        .toList();
+  }
+
   // Additional methods (e.g., fetching by orderId, productId, etc.) can be added as needed
 }

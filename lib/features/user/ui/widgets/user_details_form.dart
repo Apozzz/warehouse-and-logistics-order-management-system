@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:inventory_system/constants/route_paths.dart';
+import 'package:inventory_system/enums/driving_category.dart';
 import 'package:inventory_system/features/user/DAOs/user_dao.dart';
 import 'package:inventory_system/features/user/models/user_model.dart';
 import 'package:inventory_system/shared/extensions/navigator_extension.dart';
+import 'package:inventory_system/shared/ui/widgets/license_category_multi_select.dart';
 import 'package:provider/provider.dart';
 
 class UserDetailsForm extends StatefulWidget {
@@ -18,6 +20,7 @@ class UserDetailsForm extends StatefulWidget {
 class _UserDetailsFormState extends State<UserDetailsForm> {
   final _formKey = GlobalKey<FormState>();
   late String _name, _email, _phoneNumber;
+  Set<DrivingLicenseCategory> _selectedLicenses = {};
   bool _isLoading = false;
 
   @override
@@ -26,6 +29,7 @@ class _UserDetailsFormState extends State<UserDetailsForm> {
     _name = widget.user.name;
     _email = widget.user.email;
     _phoneNumber = widget.user.phoneNumber;
+    _selectedLicenses = widget.user.licensesHeld;
   }
 
   Future<void> _saveForm() async {
@@ -41,6 +45,7 @@ class _UserDetailsFormState extends State<UserDetailsForm> {
           phoneNumber: _phoneNumber,
           createdAt: widget.user.createdAt,
           companyIds: widget.user.companyIds,
+          licensesHeld: _selectedLicenses,
         );
 
         // Use Provider to access UserDAO and update the user
@@ -94,6 +99,14 @@ class _UserDetailsFormState extends State<UserDetailsForm> {
             onSaved: (value) => _phoneNumber = value!,
             validator: (value) =>
                 value!.isEmpty ? 'Please enter a phone number' : null,
+          ),
+          LicenseCategoryMultiSelect(
+            initialSelectedCategories: _selectedLicenses,
+            onSelectionChanged: (newSelectedCategories) {
+              setState(() {
+                _selectedLicenses = newSelectedCategories;
+              });
+            },
           ),
           // Save button
           ElevatedButton(

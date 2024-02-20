@@ -1,5 +1,6 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:inventory_system/enums/driving_category.dart';
 import 'package:inventory_system/features/user/DAOs/user_dao.dart';
 import 'package:inventory_system/features/user/models/user_model.dart';
 import 'package:inventory_system/features/user/services/user_service.dart';
@@ -9,12 +10,14 @@ class DriverSelect extends StatefulWidget {
   final String? initialDriverId;
   final Function(User?) onSelected;
   final String companyId;
+  final DrivingLicenseCategory? requiredLicenseCategory;
 
   const DriverSelect({
     Key? key,
     this.initialDriverId,
     required this.onSelected,
     required this.companyId,
+    this.requiredLicenseCategory,
   }) : super(key: key);
 
   @override
@@ -39,6 +42,14 @@ class _DriverSelectState extends State<DriverSelect> {
     final userService = Provider.of<UserService>(context, listen: false);
     List<User> fetchedDrivers = await userService
         .fetchDriverUsersWithPackagingPermission(widget.companyId);
+
+    if (widget.requiredLicenseCategory != null) {
+      fetchedDrivers = fetchedDrivers.where((driver) {
+        // Check if driver holds the required license category
+        return driver.licensesHeld.contains(widget.requiredLicenseCategory);
+      }).toList();
+    }
+
     setState(() {
       drivers = fetchedDrivers;
     });

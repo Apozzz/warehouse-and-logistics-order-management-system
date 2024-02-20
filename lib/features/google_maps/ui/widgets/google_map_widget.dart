@@ -3,7 +3,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:inventory_system/features/google_maps/services/google_maps_service.dart';
 import 'package:inventory_system/shared/services/location_tracking_service.dart';
 import 'package:inventory_system/utils/lat_lant_converter.dart';
-import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 
 class GoogleMapWidget extends StatefulWidget {

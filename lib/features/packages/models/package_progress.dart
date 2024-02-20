@@ -12,6 +12,7 @@ class PackageProgress {
   final int quantity;
   final int packagedQuantity;
   final PackageProgressStatus status;
+  final String? declineReason;
 
   PackageProgress({
     required this.id,
@@ -24,21 +25,23 @@ class PackageProgress {
     required this.quantity,
     this.packagedQuantity = 0,
     this.status = PackageProgressStatus.NotStarted,
+    this.declineReason,
   });
 
   // Factory constructor to create a PackageProgress instance from a Map
   factory PackageProgress.fromMap(Map<String, dynamic> data, String id) {
     return PackageProgress(
       id: id,
-      companyId: data['companyId'] as String,
-      deliveryId: data['deliveryId'] as String,
-      orderId: data['orderId'] as String,
-      productId: data['productId'] as String,
-      userId: data['userId'] as String,
-      scanCode: data['scanCode'] as String,
-      quantity: data['quantity'] as int,
-      packagedQuantity: data['packagedQuantity'] as int,
-      status: PackageProgressStatus.values[data['status'] as int],
+      companyId: data['companyId'],
+      deliveryId: data['deliveryId'],
+      orderId: data['orderId'],
+      productId: data['productId'],
+      userId: data['userId'],
+      scanCode: data['scanCode'],
+      quantity: data['quantity'],
+      packagedQuantity: data['packagedQuantity'],
+      status: PackageProgressStatus.values[data['status']],
+      declineReason: data['declineReason'],
     );
   }
 
@@ -54,6 +57,7 @@ class PackageProgress {
       'quantity': quantity,
       'packagedQuantity': packagedQuantity,
       'status': status.index,
+      'declineReason': declineReason,
     };
   }
 
@@ -69,6 +73,7 @@ class PackageProgress {
     int? quantity,
     int? packagedQuantity,
     PackageProgressStatus? status,
+    String? declineReason,
   }) {
     return PackageProgress(
       id: id ?? this.id,
@@ -81,6 +86,7 @@ class PackageProgress {
       quantity: quantity ?? this.quantity,
       packagedQuantity: packagedQuantity ?? this.packagedQuantity,
       status: status ?? this.status,
+      declineReason: declineReason ?? this.declineReason,
     );
   }
 

@@ -26,7 +26,9 @@ class LocationTrackingService {
     _isPermissionGranted = permissionGranted == PermissionStatus.granted;
   }
 
-  Future<void> startTracking() async {
+  Future<void> startTracking({
+    required Function(List<LatLng>) onLocationUpdate,
+  }) async {
     if (!_isPermissionGranted) {
       await _checkPermissions();
     }
@@ -37,6 +39,7 @@ class LocationTrackingService {
         LatLng newLatLng =
             LatLng(currentLocation.latitude!, currentLocation.longitude!);
         recordedLocations.add(newLatLng);
+        onLocationUpdate(recordedLocations);
         // Notify any listeners that the location updated, if necessary
       });
     } else {
@@ -55,6 +58,7 @@ class LocationTrackingService {
     });
 
     recordedLocations.clear(); // Clear the recorded locations
+
     return locations; // Return the copy for further processing
   }
 
@@ -72,5 +76,9 @@ class LocationTrackingService {
     } else {
       throw Exception('Location permission not granted');
     }
+  }
+
+  void setRecordedLocations(List<LatLng> locations) {
+    recordedLocations = locations;
   }
 }

@@ -33,12 +33,19 @@ class _PackageProgressPageState extends State<PackageProgressPage> {
     deliveryDAO = Provider.of<DeliveryDAO>(context, listen: false);
   }
 
+  void refreshPackageProgressList() {
+    setState(() {
+      futurePackageProgressList = _fetchPackageProgress();
+    });
+  }
+
   Future<void> _updateIsFinished(
       List<PackageProgress> packageProgressList) async {
     final delivery = await deliveryDAO.getDeliveryById(widget.deliveryId);
 
-    bool allPackagesPackaged = packageProgressList
-        .every((p) => p.status == PackageProgressStatus.Packaged);
+    bool allPackagesPackaged = packageProgressList.every((p) =>
+        p.status == PackageProgressStatus.Packaged ||
+        p.status == PackageProgressStatus.Declined);
     bool deliveryIsInValidState =
         delivery.status == DeliveryStatus.NotStarted ||
             delivery.status == DeliveryStatus.Preparing;
@@ -113,7 +120,10 @@ class _PackageProgressPageState extends State<PackageProgressPage> {
                   itemCount: packageProgressList.length,
                   itemBuilder: (context, index) {
                     return PackageProgressItem(
-                        progress: packageProgressList[index]);
+                      progress: packageProgressList[index],
+                      onStatusChange:
+                          refreshPackageProgressList, // Pass the callback here
+                    );
                   },
                 );
               },

@@ -3,7 +3,9 @@ import 'package:inventory_system/enums/delivery_status.dart';
 import 'package:inventory_system/enums/order_status.dart';
 import 'package:inventory_system/features/delivery/DAOs/delivery_dao.dart';
 import 'package:inventory_system/features/delivery/models/delivery_model.dart';
+import 'package:inventory_system/features/delivery/models/ongoing_delivery_session.dart';
 import 'package:inventory_system/features/delivery/models/transportation_details.dart';
+import 'package:inventory_system/features/delivery/services/ongoing_delivery_session_servide.dart';
 import 'package:inventory_system/features/order/DAOs/order_dao.dart';
 import 'package:inventory_system/features/order/models/order_model.dart';
 import 'package:inventory_system/features/order/ui/widgets/order_status_floating_action_button.dart';
@@ -14,9 +16,13 @@ import 'package:provider/provider.dart';
 
 class PackageTransportDetailPage extends StatefulWidget {
   final String deliveryId;
+  final OngoingDeliverySession? ongoingSession;
 
-  const PackageTransportDetailPage({Key? key, required this.deliveryId})
-      : super(key: key);
+  const PackageTransportDetailPage({
+    Key? key,
+    required this.deliveryId,
+    this.ongoingSession,
+  }) : super(key: key);
 
   @override
   _PackageTransportDetailPageState createState() =>
@@ -35,11 +41,27 @@ class _PackageTransportDetailPageState
   void initState() {
     super.initState();
     _ordersFuture = fetchOrders(widget.deliveryId);
+    if (widget.ongoingSession != null) {
+      _isDeliveryInProgress = true;
+      _showMap = true;
+    }
   }
 
   Future<void> startDelivery(List<Order> deliveryOrders) async {
+    final existingSession =
+        await Provider.of<OngoingDeliverySessionService>(context, listen: false)
+            .getSessionByUser(_currentDelivery.userId);
+
+    if (existingSession != null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              "A delivery session is already in progress for delivery ${existingSession.deliveryId}.")));
+      return; // Exit early if there's an ongoing session
+    }
+
     Provider.of<DeliveryTrackingProvider>(context, listen: false)
-        .startDeliveryTracking();
+        .startDeliveryTracking(_currentDelivery);
+
     await updateOrderStatuses(deliveryOrders, OrderStatus.InTransit);
     setState(() {
       _isDeliveryInProgress = true;

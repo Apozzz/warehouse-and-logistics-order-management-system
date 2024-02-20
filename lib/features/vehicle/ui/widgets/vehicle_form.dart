@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_system/enums/driving_category.dart';
 import 'package:inventory_system/features/category/models/category_model.dart';
 import 'package:inventory_system/features/category/ui/widgets/category_multi_select.dart';
 import 'package:inventory_system/features/order/models/order_model.dart';
 import 'package:inventory_system/features/vehicle/models/vehicle_model.dart';
+import 'package:inventory_system/shared/ui/widgets/license_category_selector.dart';
 
 class VehicleForm extends StatefulWidget {
   final Vehicle? vehicle; // Null if adding a new vehicle
@@ -33,6 +35,7 @@ class _VehicleFormState extends State<VehicleForm> {
   bool _availability = true;
   List<Order> _selectedOrders = [];
   List<Category> _selectedAllowedCategories = [];
+  DrivingLicenseCategory _drivingLicenseCategory = DrivingLicenseCategory.B;
 
   @override
   void initState() {
@@ -48,6 +51,7 @@ class _VehicleFormState extends State<VehicleForm> {
           widget.vehicle!.assignedOrderIds, widget.allOrders);
       _selectedAllowedCategories = mapCategoryIdsToCategories(
           widget.vehicle!.allowedCategories, widget.allCategories);
+      _drivingLicenseCategory = widget.vehicle!.requiredLicenseCategory;
     }
   }
 
@@ -146,6 +150,14 @@ class _VehicleFormState extends State<VehicleForm> {
               onSelectionChanged: _onAllowedCategorySelectionChanged,
               initialSelectedCategories: _selectedAllowedCategories,
             ),
+            LicenseCategorySelect(
+              initialCategory: widget.vehicle?.requiredLicenseCategory,
+              onSelected: (DrivingLicenseCategory? newValue) {
+                _drivingLicenseCategory = newValue ??
+                    DrivingLicenseCategory
+                        .B; // Assuming B as a default or handle null as needed
+              },
+            ),
             ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
@@ -165,9 +177,9 @@ class _VehicleFormState extends State<VehicleForm> {
                     availability: _availability,
                     assignedOrderIds: assignedOrderIds,
                     allowedCategories: allowedCategoryIds,
+                    requiredLicenseCategory: _drivingLicenseCategory,
                   );
                   widget.onSubmit(newVehicle);
-                  Navigator.pop(context);
                 }
               },
               child: const Text('Submit'),

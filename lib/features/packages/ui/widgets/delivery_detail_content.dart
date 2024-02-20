@@ -38,6 +38,8 @@ class DeliveryDetailContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(isDeliveryInProgress);
+    print(showMap);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

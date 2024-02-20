@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:inventory_system/enums/driving_category.dart';
 
 class User {
   final String id;
@@ -7,6 +8,7 @@ class User {
   final String phoneNumber;
   final DateTime createdAt;
   final List<String> companyIds;
+  final Set<DrivingLicenseCategory> licensesHeld;
 
   User({
     required this.id,
@@ -15,6 +17,7 @@ class User {
     required this.phoneNumber,
     required this.createdAt,
     required this.companyIds,
+    required this.licensesHeld,
   });
 
   // Factory constructor to create a User instance from a Map
@@ -23,6 +26,13 @@ class User {
         ? (data['createdAt'] as Timestamp).toDate()
         : DateTime.now();
 
+    final licensesHeld = (data['licensesHeld'] as List<dynamic>?)
+            ?.map((license) => DrivingLicenseCategory.values.firstWhere(
+                (e) => e.toString().split('.').last == license,
+                orElse: () => DrivingLicenseCategory.AM))
+            .toSet() ??
+        {};
+
     return User(
       id: id,
       name: data['name'] ?? '',
@@ -30,6 +40,7 @@ class User {
       phoneNumber: data['phoneNumber'] ?? '',
       createdAt: createdAt,
       companyIds: List<String>.from(data['companyIds'] ?? []),
+      licensesHeld: licensesHeld,
     );
   }
 
@@ -41,6 +52,9 @@ class User {
       'phoneNumber': phoneNumber,
       'createdAt': createdAt,
       'companyIds': companyIds,
+      'licensesHeld': licensesHeld
+          .map((license) => license.toString().split('.').last)
+          .toList(),
     };
   }
 
@@ -52,6 +66,7 @@ class User {
       phoneNumber: '',
       createdAt: DateTime(0),
       companyIds: <String>[],
+      licensesHeld: {},
     );
   }
 
@@ -60,6 +75,8 @@ class User {
       name.isEmpty &&
       email.isEmpty &&
       phoneNumber.isEmpty &&
-      companyIds.isEmpty;
+      companyIds.isEmpty &&
+      licensesHeld.isEmpty;
+
   bool get isNotEmpty => !isEmpty;
 }

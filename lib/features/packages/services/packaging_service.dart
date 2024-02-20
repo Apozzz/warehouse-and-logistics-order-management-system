@@ -137,5 +137,33 @@ class PackagingService {
     }
   }
 
+  Future<void> declineAllPackagesForOrder(
+      String orderId, String declineReason) async {
+    List<PackageProgress> packages =
+        await packageProgressDAO.getPackageProgressByOrderId(orderId);
+
+    for (var package in packages) {
+      await packageProgressDAO.updatePackageProgress(package.id, {
+        'status': PackageProgressStatus.Declined.index,
+        'declineReason': declineReason, // Include declineReason in the update
+        'packagedQuantity': 0,
+      });
+    }
+  }
+
+  Future<void> restoreAllPackagesForOrder(String orderId) async {
+    List<PackageProgress> packages =
+        await packageProgressDAO.getPackageProgressByOrderId(orderId);
+
+    // Batch update to restore all packages
+    for (var package in packages) {
+      await packageProgressDAO.updatePackageProgress(package.id, {
+        'status': PackageProgressStatus.NotStarted.index,
+        'declineReason': null,
+        'packagedQuantity': 0,
+      });
+    }
+  }
+
   // ... other methods like fetchPackageProgressByCompanyId, fetchPackageProgressByCompanyIdAndUserId
 }

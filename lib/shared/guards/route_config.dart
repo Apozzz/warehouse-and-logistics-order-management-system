@@ -19,9 +19,9 @@ import 'package:inventory_system/features/user/models/user_model.dart';
 import 'package:inventory_system/features/user/ui/pages/user_details_form_page.dart';
 import 'package:inventory_system/features/vehicle/ui/pages/vehicle_page.dart';
 import 'package:inventory_system/features/warehouse/ui/pages/warehouse_and_sector_page.dart';
-import 'package:inventory_system/features/warehouse/ui/pages/warehouse_page.dart';
 import 'package:inventory_system/shared/providers/company_provider.dart';
 import 'package:inventory_system/shared/ui/pages/no_access_page.dart';
+import 'package:inventory_system/shared/ui/pages/no_internet_connection_page.dart';
 import 'package:provider/provider.dart';
 
 typedef RouteBuilder = Widget Function(BuildContext context);
@@ -144,5 +144,9 @@ final List<RouteConfig> routeConfigs = [
         PackageProgressOverviewPage(canViewAll: args as bool),
     isProtected: true,
     appPage: AppPage.Packaging,
+  ),
+  RouteConfig(
+    path: RoutePaths.noInternetConnection,
+    builder: (_) => const NoInternetConnectionPage(),
   ),
 ];
